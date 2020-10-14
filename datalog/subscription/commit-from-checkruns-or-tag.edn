@@ -1,0 +1,27 @@
+[:find (pull ?commit [*])
+ :in $ $before-db %
+ :where
+ (or-join [?commit]
+   ;(and
+   ;  (tx-entity-id :git.commit/tag ?tag)
+   ;  [?commit :git.commit/tag ?tag])
+   (and
+     (tx-entity-id :github.checkrun/name ?last-checkrun)
+     [?last-checkrun :github.checkrun/checksuite ?checksuite]
+     [?checksuite :github.checksuite/commit ?commit]))
+
+ (config-value "check-names" ?check-run-names)
+
+ [?cs :github.checksuite/commit ?commit]
+
+ ;; count of successful checkruns that have the right name
+ [(q (quote [:find (count ?checkrun)
+             :in $ ?checksuite ?check-run-names
+             :where
+             [?checkrun :github.checkrun/checksuite ?checksuite]
+             [?checkrun :github.checkrun/status :github.checkrun.status/completed]
+             [?checkrun :github.checkrun/name ?check-run-name]
+             [((fn [names nm] ((set names) nm)) ?check-run-names ?check-run-name)]])
+    $ ?cs ?check-run-names)
+  [[?check-run-count]]]
+ [(count ?check-run-names) ?check-run-count]]
