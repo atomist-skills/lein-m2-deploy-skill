@@ -2,7 +2,7 @@
 
 <!---atomist-skill-readme:start--->
 
-Explain a bit about what this skill does
+Builds leiningen projects and publishes jars to manen repositories
 
 ## Integrations
 
