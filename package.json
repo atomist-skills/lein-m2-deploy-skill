@@ -9,11 +9,11 @@
     "atm:lint:prettier": "prettier --write"
   },
   "dependencies": {
-    "@atomist/api-cljs": "^0.4.25",
+    "@atomist/api-cljs": "^0.4.111",
     "js-yaml": "^3.14.0"
   },
   "devDependencies": {
-    "@atomist/skill-bundler": "^0.1.23",
+    "@atomist/skill-bundler": "^0.1.26",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "prettier": "^2.1.1",
