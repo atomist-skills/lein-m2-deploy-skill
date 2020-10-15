@@ -13,6 +13,7 @@
 ;; limitations under the License.
 
 {:deps {:aliases [:dev :test]},
+ :jvm-opts ["-Xmx256m"]
  :builds
  {:dev
   {:target :node-library,
