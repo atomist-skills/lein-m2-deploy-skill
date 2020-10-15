@@ -2,7 +2,7 @@
 
 <!---atomist-skill-readme:start--->
 
-Builds leiningen projects and publishes jars to manen repositories
+Builds leiningen projects and publishes jars to maven repositories
 
 ## Integrations
 
