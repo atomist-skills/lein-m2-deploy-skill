@@ -8,7 +8,7 @@ Builds leiningen projects and publishes jars to manen repositories
 
 <!---atomist-skill-readme:end--->
 
---- 
+---
 
 Created by [Atomist][atomist]. Need Help? [Join our Slack workspace][slack].
 
