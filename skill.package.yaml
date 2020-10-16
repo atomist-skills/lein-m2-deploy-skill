@@ -17,3 +17,5 @@ package:
   type: atomist/container-skill
   command: npm ci && npm run skill
   tag: default-branch-only
+
+kick: 1
