@@ -5,7 +5,7 @@
     "build:watch": "shadow-cljs watch dev",
     "build": "shadow-cljs release release",
     "bundle": "bundle",
-    "skill": "npm run build && npm run bundle",
+    "skill": "npm run bundle",
     "atm:lint:prettier": "prettier --write"
   },
   "dependencies": {
