@@ -22,6 +22,7 @@
   :release
   {:target :node-script,
    :output-to "index.js",
-   :main atomist.main/handler
    :exports {:handler atomist.main/handler},
-   :compiler-options {:optimizations :simple}}}}
+   :compiler-options {:optimizations :advanced}
+   :main atomist.main/handler}}
+ :jvm-opts ["-XX:+UnlockExperimentalVMOptions" "-XX:+UseCGroupMemoryLimitForHeap" "-XX:+PrintCommandLineFlags"]}
