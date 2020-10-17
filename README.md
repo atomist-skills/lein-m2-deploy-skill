@@ -1,10 +1,8 @@
-# `@atomist/my-skill`
+# `@atomist/lein-m2-deploy-skill`
 
 <!---atomist-skill-readme:start--->
 
 Builds leiningen projects and publishes jars to maven repositories
-
-## Integrations
 
 <!---atomist-skill-readme:end--->
 

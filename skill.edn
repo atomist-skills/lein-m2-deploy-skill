@@ -35,10 +35,4 @@
     :image "gcr.io/atomist-container-skills/lein-m2-deploy-skill",
     :resources
     {:request {:cpu 0.1, :memory 1000},
-     :limit {:cpu 1, :memory 1000}}}],
-  :gcf
-  [{:name "package-cljs-skill",
-    :entryPoint "eventhandler",
-    :memory 512, 
-    :runtime "nodejs10", 
-    :timeout 60}]}}
+     :limit {:cpu 1, :memory 1000}}}]}}
