@@ -16,7 +16,7 @@
  "Run `lein deploy` to publish jars to a Maven (M2) repository",
  :license "unknown",
  :displayName "Lein M2 Deploy",
- :name "lein-m2-deploy",
+ :name "lein-m2-deploy-skill",
  :author "kipz",
  :iconUrl
  "https://raw.githubusercontent.com/cljs/logo/master/cljs.png",
