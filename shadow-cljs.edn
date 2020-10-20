@@ -12,8 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-{:deps {:aliases [:dev :test]},
- :jvm-opts ["-Xmx2G" "-XX:+UnlockExperimentalVMOptions" "-XX:+PrintCommandLineFlags" "-XX:+UseCGroupMemoryLimitForHeap"]
+{:deps true,
  :builds
  {:dev
   {:target :node-library,

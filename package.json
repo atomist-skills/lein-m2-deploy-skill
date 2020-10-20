@@ -2,8 +2,8 @@
   "name": "atomist-skill",
   "version": "0.1.0",
   "scripts": {
-    "build:watch": "shadow-cljs watch dev",
-    "build": "shadow-cljs release release",
+    "build:watch": "shadow-cljs watch dev -A:dev:test",
+    "build": "shadow-cljs release release -A:dev:build",
     "bundle": "bundle",
     "skill": "npm run bundle",
     "atm:lint:prettier": "prettier --write"
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@atomist/skill-bundler": "^0.1.26",
-    "husky": "^4.2.5",
+    "husky": "^4.3.0",
     "lint-staged": "^10.4.2",
     "prettier": "^2.1.1",
     "shadow-cljs": "^2.8.69",
