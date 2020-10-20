@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "build:watch": "shadow-cljs watch dev",
-    "build": "shadow-cljs release release -A:release",
+    "build": "shadow-cljs release release",
     "bundle": "bundle",
     "skill": "npm run bundle",
     "atm:lint:prettier": "prettier --write"

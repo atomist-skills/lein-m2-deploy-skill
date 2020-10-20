@@ -23,4 +23,5 @@
    :output-to "index.js",
    :exports {:handler atomist.main/handler},
    :compiler-options {:optimizations :advanced}
-   :main atomist.main/handler}}}
+   :main atomist.main/handler}}
+ :jvm-opts ["-XX:+UnlockExperimentalVMOptions" "-XX:+UseCGroupMemoryLimitForHeap" "-XX:+PrintCommandLineFlags"]}
