@@ -12,16 +12,4 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-{:deps {:aliases [:dev :test]},
- :jvm-opts ["-Xmx2G" "-XX:+UnlockExperimentalVMOptions" "-XX:+PrintCommandLineFlags" "-XX:+UseCGroupMemoryLimitForHeap"]
- :builds
- {:dev
-  {:target :node-library,
-   :exports {:handler atomist.main/handler},
-   :output-to "index.js"},
-  :release
-  {:target :node-script,
-   :output-to "index.js",
-   :exports {:handler atomist.main/handler},
-   :compiler-options {:optimizations :simple}
-   :main atomist.main/handler}}}
+(ns user)
