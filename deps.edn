@@ -34,8 +34,7 @@
      :sha "f2d683806d4cbada7a7ad824b033a46f9e242e5a"}},
    :main-opts ["-m" "metav.display" "--prefix" ":none"]},
   :release
-  {:jvm-opts ["-XX:+UnlockExperimentalVMOptions" "-XX:+PrintCommandLineFlags" "-XX:+UseCGroupMemoryLimitForHeap"]
-   :extra-deps
+  {:extra-deps
    {metav
     {:git/url "https://github.com/slimslenderslacks/metav.git",
      :sha "f2d683806d4cbada7a7ad824b033a46f9e242e5a"}},
