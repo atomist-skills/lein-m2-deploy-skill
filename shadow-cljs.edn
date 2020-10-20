@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 {:deps {:aliases [:dev :test]},
- :jvm-opts ["-Xmx2GB" "-XX:+UnlockExperimentalVMOptions" "-XX:+PrintCommandLineFlags" "-XX:+UseCGroupMemoryLimitForHeap"]
+ :jvm-opts ["-Xmx2G" "-XX:+UnlockExperimentalVMOptions" "-XX:+PrintCommandLineFlags" "-XX:+UseCGroupMemoryLimitForHeap"]
  :builds
  {:dev
   {:target :node-library,
