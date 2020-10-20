@@ -22,8 +22,8 @@
    {org.clojure/clojure {:mvn/version "1.10.1"},
     org.clojure/clojurescript {:mvn/version "1.10.520"},
     thheller/shadow-cljs {:mvn/version "2.8.40"}},
-   :extra-paths ["dev" "/Users/slim/atmhq/api-cljs/src"]},
-  :test {:extra-paths ["test" "/Users/slim/atmhq/api-cljs/src"]},
+   :extra-paths ["dev" "dev-resources" "/Users/slim/atmhq/api-cljs/src"]},
+  :test {:extra-paths ["test" "dev-resources" "/Users/slim/atmhq/api-cljs/src"]},
   :cljfmt
   {:extra-deps {cljfmt {:mvn/version "0.6.7"}},
    :main-opts ["-m" "cljfmt.main" "fix" "src" "test"]},
@@ -34,7 +34,8 @@
      :sha "f2d683806d4cbada7a7ad824b033a46f9e242e5a"}},
    :main-opts ["-m" "metav.display" "--prefix" ":none"]},
   :release
-  {:extra-deps
+  {:jvm-opts ["-XX:+UnlockExperimentalVMOptions" "-XX:+PrintCommandLineFlags" "-XX:+UseCGroupMemoryLimitForHeap"]
+   :extra-deps
    {metav
     {:git/url "https://github.com/slimslenderslacks/metav.git",
      :sha "f2d683806d4cbada7a7ad824b033a46f9e242e5a"}},
