@@ -22,12 +22,19 @@
  "https://raw.githubusercontent.com/cljs/logo/master/cljs.png",
  :homepageUrl "https://github.com/atomist-skills/lein-m2-deploy-skill",
  :namespace "atomist",
+ :resourceProviders
+ [{:name "maven",
+   :description
+   "Maven repository for resolving artifacts referenced in project.clj",
+   :typeName "MavenRepositoryProvider",
+   :minRequired 0,
+   :maxAllowed 1}],
  :parameters
  [{:stringArray
-   {:description "Choose Check Runs which must pass for this skill to fire",
-    :displayName "Set of Requires Check Runs",
+   {:description "GitHub Checks which must have passed for this skill to fire. Leave empty for none",
+    :displayName "GitHub Checks",
     :name "check-names",
-    :minRequired 1,
+    :minRequired 0,
     :required true}}],
  :artifacts
  {:docker

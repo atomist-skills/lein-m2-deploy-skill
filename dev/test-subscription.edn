@@ -1,0 +1,166 @@
+{:query
+ [:find (pull ?org [:github.org/installation-token
+                    :git.org/name
+                    :git.provider/url])
+  ?commit-sha
+  ?tag-name
+  (pull ?repo [:git.repo/source-id
+               :git.repo/name
+               :git.provider/url])
+  :in $ $before-db %
+  :where
+  (or-join [?commit]
+    (and
+      (tx-entity-id :git.ref/type ?tag)
+      [?tag :git.ref/type :git.ref.type/tag]
+      [?tag :git.ref/commit ?commit])
+    (and
+      (tx-entity-id :github.checkrun/name ?last-checkrun)
+      [?last-checkrun :github.checkrun/checksuite ?checksuite]
+      [?checksuite :github.checksuite/commit ?commit]))
+
+
+  [?commit :git.commit/repo ?repo]
+  [?repo :git.repo/org ?org]
+  [?commit :git.commit/sha ?commit-sha]
+
+  ;; only tags (for now)
+  [?tag :git.ref/commit ?commit]
+  [?tag :git.ref/type :git.ref.type/tag]
+  [?tag :git.ref/name ?tag-name]
+
+  ;; only clojure projects
+
+  [?repo-language :git.repo-language/repo ?repo]
+  [(ground "Clojure") ?clojure-language]
+  [?repo-language :git.repo-language/name ?clojure-language]
+
+  ;; need some rules for this - should be contributed by content-indexer-skill
+
+  ;; project-clj must exist
+  [(ground "path-exists") ?exists-index]
+  [(ground "project.clj") ?project-clj-path]
+  [?fp :atomist.content.index/commit ?commit]
+  [?fp :atomist.content.index/name ?exists-index]
+  [?fp :atomist.content.index/value ?project-clj-path]
+
+  ;; dockerfiles must not exist
+  [(identity ["Dockerfile" "docker/Dockerfile" "docker/Dockerfile.gcr"]) ?docker-files]
+  [(q (quote [:find (count ?fp)
+              :in $ ?commit [?docker-file ...]
+              :where
+              [(ground "path-not-exists") ?not-exists-index]
+              [?fp :atomist.content.index/commit ?commit]
+              [?fp :atomist.content.index/name ?not-exists-index]
+              [?fp :atomist.content.index/value ?docker-file]])
+     $ ?commit ?docker-files)
+   [[?fp-count]]]
+  [(count ?docker-files) ?fp-count]
+
+  ;; checks (if configured) must have passed
+  (get-config-value "check-names" [] ?check-run-names)
+
+  (or-join [?commit ?check-run-names]
+    [(empty? ?check-run-names)]
+    (and
+      ;; count of successful checkruns that have the right name
+      [?cs :github.checksuite/commit ?commit]
+      [(q (quote [:find (distinct ?check-run-name)
+                  :in $ ?checksuite
+                  :where
+                  [?checkrun :github.checkrun/checksuite ?checksuite]
+                  [?checkrun :github.checkrun/status :github.checkrun.status/completed]
+                  [?checkrun :github.checkrun/name ?check-run-name]])
+         $ ?cs)
+       [[?distinct-check-run-names]]]
+      [((fn [s1 s2] (= (set s1) (set s2))) ?distinct-check-run-names ?check-run-names)]))]
+
+ :skill {:id "other-skill-id"
+         :name "some-skill"
+         :namespace "atomist"
+         :team-id "AK748NQC5"
+         :version "1.2.3"
+         :configurations [{:name "made-up-config"
+                           :parameters [{:name "check-names"
+                                         :value ["github-secret-scanner-skill"]}]}]}
+
+ :entities [
+
+            {:schema/entity-type :git/ref
+             :schema/entity "$head-ref"
+             :git.ref/type :git.ref.type/tag
+             :git.provider/url "https://github.com"
+             :git.ref/name "1.2.3"
+             :git.ref/repo "$repo"
+             :git.ref/commit "$head-commit"}
+
+            {:schema/entity-type :atomist.content.index/item
+             :schema/entity "$item"
+             :atomist.content.index/commit "$head-commit"
+             :atomist.content.index/name "path-exists"
+             :atomist.content.index/value "project.clj"}
+
+            {:schema/entity-type :atomist.content.index/item
+             :schema/entity "$item2"
+             :atomist.content.index/commit "$head-commit"
+             :atomist.content.index/name "path-not-exists"
+             :atomist.content.index/value "Dockerfile"}
+
+            {:schema/entity-type :atomist.content.index/item
+             :schema/entity "$item3"
+             :atomist.content.index/commit "$head-commit"
+             :atomist.content.index/name "path-not-exists"
+             :atomist.content.index/value "docker/Dockerfile"}
+
+            {:schema/entity-type :atomist.content.index/item
+             :schema/entity "$item4"
+             :atomist.content.index/commit "$head-commit"
+             :atomist.content.index/name "path-not-exists"
+             :atomist.content.index/value "docker/Dockerfile.gcr"}
+
+            {:schema/entity-type :git/org
+             :schema/entity "$org"
+             :git.provider/url "https://github.com"
+             :git.org/name "atomisthq"
+             :github.org/installation-token "some-token"
+             :git.org/source-id "13823265"}
+
+            {:schema/entity-type :git/repo
+             :schema/entity "$repo"
+             :git.provider/url "https://github.com"
+             :git.repo/name "web-app-cljs"
+             :git.repo/source-id "225951504"
+             :git.repo/org "$org"}
+
+            {:schema/entity-type :git/repo-language
+             :schema/entity "$clojure"
+             :git.repo-language/name "Clojure"
+             :git.repo-language/repo "$repo"
+             :git.provider/url "https://github.com"}
+
+            {:schema/entity-type :git/commit
+             :schema/entity "$head-commit"
+             :git.provider/url "https://github.com"
+             :git.commit/sha "8976e7077a86e2755486eb136103b26cef5c78d7"
+             :git.commit/repo "$repo"}
+
+            {:schema/entity-type :github/checksuite
+             :schema/entity "$checksuite"
+             :git.provider/url "https://github.com"
+             :github.checksuite/source-id "1036096459"
+             :github.checksuite/app-id 407
+             :github.checksuite/app-slug "atomist"
+             :github.checksuite/status :github.checksuite.status/completed
+             :github.checksuite/conclusion :github.checksuite.conclusion/success
+             :github.checksuite/repo "$repo"
+             :github.checksuite/commit "$head-commit"}
+
+            {:schema/entity-type :github/checkrun
+             :git.provider/url "https://github.com"
+             :github.checkrun/source-id "971639351"
+             :github.checkrun/conclusion :github.checkrun.conclusion/success
+             :github.checkrun/status :github.checkrun.status/completed
+             :github.checkrun/name "github-secret-scanner-skill"
+             :github.checkrun/checksuite "$checksuite"
+             :github.checkrun/action :github.checkrun.action/completed}]
+ }

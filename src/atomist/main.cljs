@@ -18,12 +18,88 @@
             [cljs.pprint :refer [pprint]]
             [goog.string.format]
             [cljs.core.async :as async :refer [<! >! chan timeout] :refer-macros [go]]
-            [atomist.container :as container]))
+            [atomist.container :as container]
+            [cljs-node-io.core :as io]
+            [goog.string :as gstring]
+            [atomist.proc :as proc]
+            [atomist.cljs-log :as log]
+            [atomist.gitflows :as gitflow]
+            [atomist.git :as git]))
+
+(defn create-ref-from-event
+  [handler]
+  (fn [request]
+    (let [[org commit-sha tag-name repo] (-> request :subscription :result first)]
+      (handler (assoc request :ref {:repo (:git.repo/name repo)
+                                    :owner (:git.org/name org)
+                                    :branch tag-name
+                                    :sha commit-sha}
+                              :token (:github.org/installation-token org))))))
+
+(defn -js->clj+
+  "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
+  [x]
+  (into {} (for [k (js-keys x)] [k (aget x k)])))
+
+(defn run-leiningen-if-present
+  [handler]
+  (fn [request]
+    (go
+     (try
+       (api/trace "run-leiningen-if-present")
+       (let [atm-home (.. js/process -env -ATOMIST_HOME)
+             f (io/file (-> request :project :path))
+             env (-> (-js->clj+ (.. js/process -env))
+                     (merge
+                      {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
+                       (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
+                       "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
+                       (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
+                       ;; use atm-home for .m2 directory
+                       "_JAVA_OPTIONS" (str "-Duser.home=" atm-home)}))
+             exec-opts
+             {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
+             sub-process-port (proc/aexec "lein deploy" exec-opts)
+             [err stdout stderr] (<! sub-process-port)]
+         (if err
+           (do
+             (log/error "process exited with code " (. err -code))
+             (<! (handler
+                  (assoc request
+                    :checkrun/conclusion "failure"
+                    :checkrun/output
+                    {:title "Leiningen Deploy Failure"
+                     :summary
+                     (str
+                      (apply str "stdout: \n" (take-last 150 stdout))
+                      (apply str
+                             "\nstderr: \n"
+                             (take-last 150 stderr)))}))))
+           (<! (handler
+                (assoc request
+                  :checkrun/conclusion "success"
+                  :checkrun/output
+                  {:title "Leiningen Deploy Success"
+                   :summary (apply str (take-last 300 stdout))})))))
+       (catch :default ex
+         (log/error ex)
+         (<! (api/finish
+              (assoc request
+                :checkrun/conclusion "failure"
+                :checkrun/output
+                {:title "Lein Deploy error"
+                 :summary "There was an error running lein deploy"})
+              :failure
+              "failed to run lein deploy")))))))
 
 (defn ^:export handler
   [& args]
   ((-> (api/finished :success "handled event in lein m2 deploy skill")
        (api/status)
+       (run-leiningen-if-present)
+       (api/clone-ref)
+       (create-ref-from-event)
+       (api/with-github-check-run :name "lein deploy")
        (api/log-event)
        (container/mw-make-container-request))
    {}))
