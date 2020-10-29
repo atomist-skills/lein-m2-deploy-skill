@@ -8,7 +8,15 @@
  :in $ $before-db %
  :where
  (get-config-value "check-names" [] ?check-run-names)
- (or-join [?commit ?check-run-names]
+ [(ground "path-exists") ?exists-index]
+ [(ground "project.clj") ?project-clj-path]
+
+ (or-join [?commit ?exists-index ?project-clj-path ?check-run-names]
+   (and
+     (tx-entity-id :atomist.content.index ?fp)
+     [?fp :atomist.content.index/commit ?commit]
+     [?fp :atomist.content.index/name ?exists-index]
+     [?fp :atomist.content.index/value ?project-clj-path])
    (and
      (tx-entity-id :git.ref/commit ?ref)
      [?ref :git.ref/commit ?commit]
@@ -31,11 +39,7 @@
  [(ground "Clojure") ?clojure-language]
  [?repo-language :git.repo-language/name ?clojure-language]
 
- ;; need some rules for this - should be contributed by content-indexer-skill
-
  ;; project-clj must exist
- [(ground "path-exists") ?exists-index]
- [(ground "project.clj") ?project-clj-path]
  [?fp :atomist.content.index/commit ?commit]
  [?fp :atomist.content.index/name ?exists-index]
  [?fp :atomist.content.index/value ?project-clj-path]
