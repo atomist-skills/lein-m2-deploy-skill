@@ -26,7 +26,7 @@
      [?last-checkrun :github.checkrun/checksuite ?checksuite]
      [?checksuite :github.checksuite/commit ?commit]
      [?last-checkrun :github.checkrun/name ?check-run-name]
-     (strings-contain? ?check-run-names ?check-run-name)))
+     #_(strings-contain? ?check-run-names ?check-run-name)))
 
 
  [?commit :git.commit/repo ?repo]
