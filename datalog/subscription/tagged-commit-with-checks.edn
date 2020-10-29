@@ -72,4 +72,4 @@
                  [?checkrun :github.checkrun/name ?check-run-name]])
         $ ?cs)
       [[?distinct-check-run-names]]]
-     [((fn [s1 s2] (= (set s1) (set s2))) ?distinct-check-run-names ?check-run-names)]))]
+     [((fn [s1 s2] (clojure.set/subset? (set s2) (set s1))) ?distinct-check-run-names ?check-run-names)]))]
