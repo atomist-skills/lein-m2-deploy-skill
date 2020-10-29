@@ -2,7 +2,6 @@
                    :git.org/name
                    :git.provider/url])
  ?commit-sha
- ?tag-name
  (pull ?repo [:git.repo/source-id
               :git.repo/name
               :git.provider/url])
@@ -22,11 +21,6 @@
  [?commit :git.commit/repo ?repo]
  [?repo :git.repo/org ?org]
  [?commit :git.commit/sha ?commit-sha]
-
- ;; only tags (for now)
- [?tag :git.ref/commit ?commit]
- [?tag :git.ref/type :git.ref.type/tag]
- [?tag :git.ref/name ?tag-name]
 
  ;; only clojure projects
 

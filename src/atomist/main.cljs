@@ -29,10 +29,9 @@
 (defn create-ref-from-event
   [handler]
   (fn [request]
-    (let [[org commit-sha tag-name repo] (-> request :subscription :result first)]
+    (let [[org commit-sha repo] (-> request :subscription :result first)]
       (handler (assoc request :ref {:repo (:git.repo/name repo)
                                     :owner (:git.org/name org)
-                                    :branch tag-name
                                     :sha commit-sha}
                               :token (:github.org/installation-token org))))))
 
