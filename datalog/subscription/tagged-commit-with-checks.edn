@@ -10,9 +10,9 @@
  :where
  (or-join [?commit]
    (and
-     (tx-entity-id :git.ref/type ?tag)
-     [?tag :git.ref/type :git.ref.type/tag]
-     [?tag :git.ref/commit ?commit])
+     (tx-entity-id :git.ref/commit ?ref)
+     [?ref :git.ref/commit ?commit]
+     [?ref :git.ref/type :git.ref.type/branch])
    (and
      (tx-entity-id :github.checkrun/name ?last-checkrun)
      [?last-checkrun :github.checkrun/checksuite ?checksuite]

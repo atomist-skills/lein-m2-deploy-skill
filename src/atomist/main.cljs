@@ -17,13 +17,13 @@
   (:require [atomist.api :as api]
             [cljs.pprint :refer [pprint]]
             [goog.string.format]
+            [atomist.gitflows :as gitflows]
             [cljs.core.async :as async :refer [<! >! chan timeout] :refer-macros [go]]
             [atomist.container :as container]
             [cljs-node-io.core :as io]
             [goog.string :as gstring]
             [atomist.proc :as proc]
             [atomist.cljs-log :as log]
-            [atomist.gitflows :as gitflow]
             [atomist.git :as git]))
 
 (defn create-ref-from-event
@@ -42,7 +42,7 @@
   (into {} (for [k (js-keys x)] [k (aget x k)])))
 
 (defn run-leiningen-if-present
-  [handler]
+  [handler lein-args-fn]
   (fn [request]
     (go
      (try
@@ -59,7 +59,8 @@
                        "_JAVA_OPTIONS" (str "-Duser.home=" atm-home)}))
              exec-opts
              {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
-             sub-process-port (proc/aexec "lein deploy" exec-opts)
+             sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
+                                          exec-opts)
              [err stdout stderr] (<! sub-process-port)]
          (if err
            (do
@@ -92,14 +93,45 @@
               :failure
               "failed to run lein deploy")))))))
 
+(defn with-tag
+  [handler]
+  (fn [request]
+    ;; report Check failures
+    (go
+     (log/info "with-tag")
+     (let [context (merge
+                    (:ref request)
+                    {:token (:token request)}
+                    {:path (-> request :project :path)})]
+       (let [{:keys [response]}
+             (<! (atomist.gitflows/no-errors
+                  (go context)
+                  [[:async-git git/fetch-tags]
+                   [:async-git git/git-rev-list]
+                   [:async-git git/git-describe-tags]
+                   [:sync #(assoc % :tag (gitflows/next-version (s/trim (:stdout %))))]
+                   [:async (fn [{:keys [tag] :as context}]
+                             (go
+                              (let [response (<! (handler (assoc request :tag tag)))]
+                                (merge
+                                 context
+                                 {:response response}
+                                 (if (= "failure" (:checkrun/conclusion response))
+                                   {:error true})))))]
+                   [:async-git git/tag]
+                   [:async-git git/push-tag]]))]
+         response)))))
+
 (defn ^:export handler
   [& args]
   ((-> (api/finished :success "handled event in lein m2 deploy skill")
        (api/status)
-       (run-leiningen-if-present)
+       (run-leiningen-if-present (fn [request]
+                                   (gstring/format "change version set '\"%s\"' && lein deploy" (:tag request))))
+       (with-tag)
        (api/clone-ref)
+       (api/with-github-check-run :name "lein m2 deploy")
        (create-ref-from-event)
-       (api/with-github-check-run :name "lein deploy")
        (api/log-event)
        (container/mw-make-container-request))
    {}))

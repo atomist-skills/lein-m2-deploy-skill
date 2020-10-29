@@ -25,9 +25,9 @@
   :where
   (or-join [?commit]
     (and
-      (tx-entity-id :git.ref/type ?tag)
-      [?tag :git.ref/type :git.ref.type/tag]
-      [?tag :git.ref/commit ?commit])
+      (tx-entity-id :git.ref/commit ?ref)
+      [?ref :git.ref/commit ?commit]
+      [?ref :git.ref/type :git.ref.type/branch])
     (and
       (tx-entity-id :github.checkrun/name ?last-checkrun)
       [?last-checkrun :github.checkrun/checksuite ?checksuite]
@@ -87,7 +87,7 @@
                   [?checkrun :github.checkrun/name ?check-run-name]])
          $ ?cs)
        [[?distinct-check-run-names]]]
-      [((fn [s1 s2] (= (set s1) (set s2))) ?distinct-check-run-names ?check-run-names)]))]
+      [((fn [s1 s2] (clojure.set/subset? (set s2) (set s1))) ?distinct-check-run-names ?check-run-names)]))]
 
  :skill {:id "other-skill-id"
          :name "some-skill"
