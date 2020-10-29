@@ -8,6 +8,7 @@
  :in $ $before-db %
  :where
  (or-join [?commit]
+   ;; the tag caused this to fire again?
    (and
      (tx-entity-id :git.ref/commit ?ref)
      [?ref :git.ref/commit ?commit]
@@ -15,7 +16,9 @@
    (and
      (tx-entity-id :github.checkrun/name ?last-checkrun)
      [?last-checkrun :github.checkrun/checksuite ?checksuite]
-     [?checksuite :github.checksuite/commit ?commit]))
+     [?checksuite :github.checksuite/commit ?commit]
+     [?last-checkrun :github.checkrun/name ?check-run-name]
+     [(!= "lein m2 deploy" ?check-run-name)]))
 
 
  [?commit :git.commit/repo ?repo]
