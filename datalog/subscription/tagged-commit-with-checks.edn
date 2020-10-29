@@ -9,7 +9,7 @@
  :where
  (or-join [?commit]
    ;; the tag caused this to fire again?
-   (and
+   #_(and
      (tx-entity-id :git.ref/commit ?ref)
      [?ref :git.ref/commit ?commit]
      [?ref :git.ref/type :git.ref.type/branch])
