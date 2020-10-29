@@ -32,6 +32,7 @@
     (let [[org commit-sha repo] (-> request :subscription :result first)]
       (handler (assoc request :ref {:repo (:git.repo/name repo)
                                     :owner (:git.org/name org)
+                                    :branch "master"
                                     :sha commit-sha}
                               :token (:github.org/installation-token org))))))
 
@@ -97,11 +98,11 @@
   (fn [request]
     ;; report Check failures
     (go
-     (log/info "with-tag")
      (let [context (merge
                     (:ref request)
                     {:token (:token request)}
                     {:path (-> request :project :path)})]
+       (log/infof "with-tag starting on ref %s at path %s" (:ref request) (:path context))
        (let [{:keys [response]}
              (<! (atomist.gitflows/no-errors
                   (go context)
