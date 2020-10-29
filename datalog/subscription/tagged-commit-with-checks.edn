@@ -25,7 +25,7 @@
      (tx-entity-id :github.checkrun/name ?last-checkrun)
      [?last-checkrun :github.checkrun/checksuite ?checksuite]
      [?checksuite :github.checksuite/commit ?commit]
-     [?last-checkrun :github.checkrun/name ?check-run-name]
+     ;[?last-checkrun :github.checkrun/name ?check-run-name]
      #_(strings-contain? ?check-run-names ?check-run-name)))
 
 
