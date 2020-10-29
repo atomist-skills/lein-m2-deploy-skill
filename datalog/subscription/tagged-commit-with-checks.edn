@@ -11,7 +11,7 @@
  [(ground "path-exists") ?exists-index]
  [(ground "project.clj") ?project-clj-path]
 
- (or-join [?commit ?exists-index ?project-clj-path ?check-run-names]
+ (or-join [?commit ?exists-index ?project-clj-path]
    (and
      (tx-entity-id :atomist.content.index/commit ?fp)
      [?fp :atomist.content.index/commit ?commit]
@@ -25,8 +25,8 @@
      (tx-entity-id :github.checkrun/name ?last-checkrun)
      [?last-checkrun :github.checkrun/checksuite ?checksuite]
      [?checksuite :github.checksuite/commit ?commit]
-     ;[?last-checkrun :github.checkrun/name ?check-run-name]
-     #_(strings-contain? ?check-run-names ?check-run-name)))
+     [?last-checkrun :github.checkrun/name ?check-run-name]
+     [(!= "lein m2 deploy" ?check-run-name)]))
 
 
  [?commit :git.commit/repo ?repo]
