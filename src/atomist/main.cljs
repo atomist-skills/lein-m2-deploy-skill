@@ -24,7 +24,8 @@
             [goog.string :as gstring]
             [atomist.proc :as proc]
             [atomist.cljs-log :as log]
-            [atomist.git :as git]))
+            [atomist.git :as git]
+            [clojure.string :as s]))
 
 (defn create-ref-from-event
   [handler]
