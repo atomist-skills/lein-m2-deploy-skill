@@ -13,7 +13,7 @@
 
  (or-join [?commit ?exists-index ?project-clj-path ?check-run-names]
    (and
-     (tx-entity-id :atomist.content.index ?fp)
+     (tx-entity-id :atomist.content.index/commit ?fp)
      [?fp :atomist.content.index/commit ?commit]
      [?fp :atomist.content.index/name ?exists-index]
      [?fp :atomist.content.index/value ?project-clj-path])
