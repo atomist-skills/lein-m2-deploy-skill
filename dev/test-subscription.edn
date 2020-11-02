@@ -22,73 +22,21 @@
                :git.provider/url])
   :in $ $before-db %
   :where
+  (or-join [?commit]
+    (tx-content-index ?commit)
+    (tx-push ?commit _)
+    (tx-check-run ?commit))
+
   (get-config-value "check-names" [] ?check-run-names)
-  [(ground "path-exists") ?exists-index]
-  [(ground "project.clj") ?project-clj-path]
+  (check-runs-passed? ?check-run-names ?commit)
+  (repo-language ?repo "Clojure")
 
-  (or-join [?commit ?exists-index ?project-clj-path ?check-run-names]
-    (and
-      (tx-entity-id :atomist.content.index ?fp)
-      [?fp :atomist.content.index/commit ?commit]
-      [?fp :atomist.content.index/name ?exists-index]
-      [?fp :atomist.content.index/value ?project-clj-path])
-    (and
-      (tx-entity-id :git.ref/commit ?ref)
-      [?ref :git.ref/commit ?commit]
-      [?ref :git.ref/type :git.ref.type/branch])
-    (and
-      (tx-entity-id :github.checkrun/name ?last-checkrun)
-      [?last-checkrun :github.checkrun/checksuite ?checksuite]
-      [?checksuite :github.checksuite/commit ?commit]
-      [?last-checkrun :github.checkrun/name ?check-run-name]
-      (strings-contain? ?check-run-names ?check-run-name)))
-
+  (content-index-contains? ?commit "path-exists" ["project.clj"])
+  (content-index-contains? ?commit "path-not-exists" ["Dockerfile" "docker/Dockerfile" "docker/Dockerfile.gcr"])
 
   [?commit :git.commit/repo ?repo]
   [?repo :git.repo/org ?org]
-  [?commit :git.commit/sha ?commit-sha]
-
-  ;; only clojure projects
-
-  [?repo-language :git.repo-language/repo ?repo]
-  [(ground "Clojure") ?clojure-language]
-  [?repo-language :git.repo-language/name ?clojure-language]
-
-  ;; project-clj must exist
-  [?fp :atomist.content.index/commit ?commit]
-  [?fp :atomist.content.index/name ?exists-index]
-  [?fp :atomist.content.index/value ?project-clj-path]
-
-  ;; dockerfiles must not exist
-  [(identity ["Dockerfile" "docker/Dockerfile" "docker/Dockerfile.gcr"]) ?docker-files]
-  [(q (quote [:find (count ?fp)
-              :in $ ?commit [?docker-file ...]
-              :where
-              [(ground "path-not-exists") ?not-exists-index]
-              [?fp :atomist.content.index/commit ?commit]
-              [?fp :atomist.content.index/name ?not-exists-index]
-              [?fp :atomist.content.index/value ?docker-file]])
-     $ ?commit ?docker-files)
-   [[?fp-count]]]
-  [(count ?docker-files) ?fp-count]
-
-  ;; checks (if configured) must have passed
-
-
-  (or-join [?commit ?check-run-names]
-    [(empty? ?check-run-names)]
-    (and
-      ;; count of successful checkruns that have the right name
-      [?cs :github.checksuite/commit ?commit]
-      [(q (quote [:find (distinct ?check-run-name)
-                  :in $ ?checksuite
-                  :where
-                  [?checkrun :github.checkrun/checksuite ?checksuite]
-                  [?checkrun :github.checkrun/status :github.checkrun.status/completed]
-                  [?checkrun :github.checkrun/name ?check-run-name]])
-         $ ?cs)
-       [[?distinct-check-run-names]]]
-      [((fn [s1 s2] (clojure.set/subset? (set s2) (set s1))) ?distinct-check-run-names ?check-run-names)]))]
+  [?commit :git.commit/sha ?commit-sha]]
 
  :skill {:id "other-skill-id"
          :name "some-skill"

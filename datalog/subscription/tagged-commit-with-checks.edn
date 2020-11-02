@@ -12,7 +12,8 @@
    (tx-push ?commit _)
    (tx-check-run ?commit))
 
- (check-runs-passed? ?commit)
+ (get-config-value "check-names" [] ?check-run-names)
+ (check-runs-passed? ?check-run-names ?commit)
  (repo-language ?repo "Clojure")
 
  (content-index-contains? ?commit "path-exists" ["project.clj"])
