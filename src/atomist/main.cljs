@@ -133,6 +133,6 @@
        (api/clone-ref)
        (api/with-github-check-run :name "lein-m2-deploy")
        (create-ref-from-event)
-       (api/log-event)
+       ;;(api/log-event)
        (container/mw-make-container-request))
    {}))
