@@ -10,10 +10,11 @@
  (or-join [?commit]
    (tx-content-index ?commit)
    (tx-push ?commit _)
-   (tx-check-run ?commit))
+   (tx-check-run ["lein-m2-deploy"] ?commit))
 
  (get-config-value "check-names" [] ?check-run-names)
  (check-runs-passed? ?check-run-names ?commit)
+
  (repo-language ?repo "Clojure")
 
  (content-index-contains? ?commit "path-exists" ["project.clj"])

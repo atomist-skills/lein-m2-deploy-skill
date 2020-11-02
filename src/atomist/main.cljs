@@ -131,7 +131,7 @@
                                    (gstring/format "change version set '\"%s\"' && lein deploy" (:tag request))))
        (with-tag)
        (api/clone-ref)
-       (api/with-github-check-run :name "lein m2 deploy")
+       (api/with-github-check-run :name "lein-m2-deploy")
        (create-ref-from-event)
        (api/log-event)
        (container/mw-make-container-request))
