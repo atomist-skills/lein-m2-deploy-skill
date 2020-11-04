@@ -16,27 +16,27 @@
  [:find (pull ?org [:github.org/installation-token
                     :git.org/name
                     :git.provider/url])
-  ?commit-sha
+  ?commit
   (pull ?repo [:git.repo/source-id
                :git.repo/name
                :git.provider/url])
   :in $ $before-db %
   :where
   (or-join [?commit]
-    (tx-content-index ?commit)
-    (tx-push ?commit _)
-    (tx-check-run ?commit))
+      (tx-content-index ?commit)
+      (tx-push ?commit _)
+      (tx-check-run ["lein-m2-deploy"] ?commit))
 
   (get-config-value "check-names" [] ?check-run-names)
   (check-runs-passed? ?check-run-names ?commit)
+
   (repo-language ?repo "Clojure")
 
   (content-index-contains? ?commit "path-exists" ["project.clj"])
   (content-index-contains? ?commit "path-not-exists" ["Dockerfile" "docker/Dockerfile" "docker/Dockerfile.gcr"])
 
   [?commit :git.commit/repo ?repo]
-  [?repo :git.repo/org ?org]
-  [?commit :git.commit/sha ?commit-sha]]
+  [?repo :git.repo/org ?org]]
 
  :skill {:id "other-skill-id"
          :name "some-skill"

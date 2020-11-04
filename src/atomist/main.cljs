@@ -30,11 +30,10 @@
 (defn create-ref-from-event
   [handler]
   (fn [request]
-    (let [[org commit-sha repo] (-> request :subscription :result first)]
+    (let [[org commit repo] (-> request :subscription :result first)]
       (handler (assoc request :ref {:repo (:git.repo/name repo)
                                     :owner (:git.org/name org)
-                                    :branch "master"
-                                    :sha commit-sha}
+                                    :sha (:git.commit/sha commit)}
                               :token (:github.org/installation-token org))))))
 
 (defn -js->clj+
