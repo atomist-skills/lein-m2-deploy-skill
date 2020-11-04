@@ -1,7 +1,7 @@
 [:find (pull ?org [:github.org/installation-token
                    :git.org/name
                    :git.provider/url])
- ?commit
+ (pull ?commit [:git.commit/sha])
  (pull ?repo [:git.repo/source-id
               :git.repo/name
               :git.provider/url])
