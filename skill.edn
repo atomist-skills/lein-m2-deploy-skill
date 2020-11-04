@@ -35,6 +35,11 @@
     :displayName "GitHub Checks",
     :name "check-names",
     :minRequired 0,
+    :required true}}
+  {:repoFilter
+   {:description "The set of Repositories.",
+    :displayName "Repository Scope",
+    :name "scope",
     :required true}}],
  :artifacts
  {:docker
