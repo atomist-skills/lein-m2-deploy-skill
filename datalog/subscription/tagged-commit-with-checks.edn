@@ -18,6 +18,12 @@
        ;; make sure we only get triggered by our own configured checks
        (array-contains? ?check-run-names ?check-run-name)))
 
+ ;; ensures we are at  the tip of the default branch
+ [?ref :git.ref/commit ?commit]
+ [?ref :git.ref/type :git.ref.type/branch]
+ [?commit :git.commit/repo ?repo]
+ (is-default-branch? ?ref)
+
  (repo-selected? ?repo)
  (check-runs-passed? ?check-run-names ?commit)
 
