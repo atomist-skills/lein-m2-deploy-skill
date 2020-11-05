@@ -31,7 +31,7 @@
    :maxAllowed 1}],
  :parameters
  [{:stringArray
-   {:description "GitHub Checks which must have passed for this skill to fire. Leave empty for none",
+   {:description "GitHub Checks which must have passed before attempting jar build and publish. Leave empty for none",
     :displayName "GitHub Checks",
     :name "check-names",
     :minRequired 0,
