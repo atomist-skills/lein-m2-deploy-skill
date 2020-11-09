@@ -34,7 +34,7 @@
       (handler (assoc request :ref {:repo (:git.repo/name repo)
                                     :owner (:git.org/name org)
                                     :sha (:git.commit/sha commit)}
-                              :token (:github.org/installation-token org))))))
+                      :token (:github.org/installation-token org))))))
 
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
@@ -45,82 +45,82 @@
   [handler lein-args-fn]
   (fn [request]
     (go
-     (try
-       (api/trace "run-leiningen-if-present")
-       (let [atm-home (.. js/process -env -ATOMIST_HOME)
-             f (io/file (-> request :project :path))
-             env (-> (-js->clj+ (.. js/process -env))
-                     (merge
-                      {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
-                       (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
-                       "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
-                       (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
+      (try
+        (api/trace "run-leiningen-if-present")
+        (let [atm-home (.. js/process -env -ATOMIST_HOME)
+              f (io/file (-> request :project :path))
+              env (-> (-js->clj+ (.. js/process -env))
+                      (merge
+                       {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
+                        (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
+                        "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
+                        (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
                        ;; use atm-home for .m2 directory
-                       "_JAVA_OPTIONS" (str "-Duser.home=" atm-home)}))
-             exec-opts
-             {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
-             sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
-                                          exec-opts)
-             [err stdout stderr] (<! sub-process-port)]
-         (if err
-           (do
-             (log/error "process exited with code " (. err -code))
-             (<! (handler
-                  (assoc request
-                    :checkrun/conclusion "failure"
-                    :checkrun/output
-                    {:title "Leiningen Deploy Failure"
-                     :summary
-                     (str
-                      (apply str "stdout: \n" (take-last 150 stdout))
-                      (apply str
-                             "\nstderr: \n"
-                             (take-last 150 stderr)))}))))
-           (<! (handler
-                (assoc request
-                  :checkrun/conclusion "success"
-                  :checkrun/output
-                  {:title "Leiningen Deploy Success"
-                   :summary (apply str (take-last 300 stdout))})))))
-       (catch :default ex
-         (log/error ex)
-         (<! (api/finish
-              (assoc request
-                :checkrun/conclusion "failure"
-                :checkrun/output
-                {:title "Lein Deploy error"
-                 :summary "There was an error running lein deploy"})
-              :failure
-              "failed to run lein deploy")))))))
+                        "_JAVA_OPTIONS" (str "-Duser.home=" atm-home)}))
+              exec-opts
+              {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
+              sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
+                                           exec-opts)
+              [err stdout stderr] (<! sub-process-port)]
+          (if err
+            (do
+              (log/error "process exited with code " (. err -code))
+              (<! (handler
+                   (assoc request
+                          :checkrun/conclusion "failure"
+                          :checkrun/output
+                          {:title "Leiningen Deploy Failure"
+                           :summary
+                           (str
+                            (apply str "stdout: \n" (take-last 150 stdout))
+                            (apply str
+                                   "\nstderr: \n"
+                                   (take-last 150 stderr)))}))))
+            (<! (handler
+                 (assoc request
+                        :checkrun/conclusion "success"
+                        :checkrun/output
+                        {:title "Leiningen Deploy Success"
+                         :summary (apply str (take-last 300 stdout))})))))
+        (catch :default ex
+          (log/error ex)
+          (<! (api/finish
+               (assoc request
+                      :checkrun/conclusion "failure"
+                      :checkrun/output
+                      {:title "Lein Deploy error"
+                       :summary "There was an error running lein deploy"})
+               :failure
+               "failed to run lein deploy")))))))
 
 (defn with-tag
   [handler]
   (fn [request]
     ;; report Check failures
     (go
-     (let [context (merge
-                    (:ref request)
-                    {:token (:token request)}
-                    {:path (-> request :project :path)})]
-       (log/infof "with-tag starting on ref %s at path %s" (:ref request) (:path context))
-       (let [{:keys [response]}
-             (<! (atomist.gitflows/no-errors
-                  (go context)
-                  [[:async-git git/fetch-tags]
-                   [:async-git git/git-rev-list]
-                   [:async-git git/git-describe-tags]
-                   [:sync #(assoc % :tag (gitflows/next-version (s/trim (:stdout %))))]
-                   [:async (fn [{:keys [tag] :as context}]
-                             (go
-                              (let [response (<! (handler (assoc request :tag tag)))]
-                                (merge
-                                 context
-                                 {:response response}
-                                 (if (= "failure" (:checkrun/conclusion response))
-                                   {:error true})))))]
-                   [:async-git git/tag]
-                   [:async-git git/push-tag]]))]
-         response)))))
+      (let [context (merge
+                     (:ref request)
+                     {:token (:token request)}
+                     {:path (-> request :project :path)})]
+        (log/infof "with-tag starting on ref %s at path %s" (:ref request) (:path context))
+        (let [{:keys [response]}
+              (<! (atomist.gitflows/no-errors
+                   (go context)
+                   [[:async-git git/fetch-tags]
+                    [:async-git git/git-rev-list]
+                    [:async-git git/git-describe-tags]
+                    [:sync #(assoc % :tag (gitflows/next-version (s/trim (:stdout %))))]
+                    [:async (fn [{:keys [tag] :as context}]
+                              (go
+                                (let [response (<! (handler (assoc request :tag tag)))]
+                                  (merge
+                                   context
+                                   {:response response}
+                                   (if (= "failure" (:checkrun/conclusion response))
+                                     {:error true})))))]
+                    [:async-git git/tag]
+                    [:async-git git/push-tag]]))]
+          response)))))
 
 (defn ^:export handler
   [& args]
