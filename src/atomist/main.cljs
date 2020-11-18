@@ -56,45 +56,45 @@
                         "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
                         (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
                        ;; use atm-home for .m2 directory
-                       "_JAVA_OPTIONS" (str "-Duser.home=" atm-home)}))
-             exec-opts
-             {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
-             sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
-                                          exec-opts)
-             [err stdout stderr] (<! sub-process-port)]
-         (if err
-           (do
-             (log/error "process exited with code " (. err -code))
-             (<! (handler
-                  (assoc request
-                    :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
-                    :checkrun/conclusion "failure"
-                    :checkrun/output
-                    {:title "Leiningen Deploy Failure"
-                     :summary
-                     (str
-                      (apply str "stdout: \n" (take-last 150 stdout))
-                      (apply str
-                             "\nstderr: \n"
-                             (take-last 150 stderr)))}))))
-           (<! (handler
-                (assoc request
-                  :atomist/summary (gstring/format "`lein deploy` success on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
-                  :checkrun/conclusion "success"
-                  :checkrun/output
-                  {:title "Leiningen Deploy Success"
-                   :summary (apply str (take-last 300 stdout))})))))
-       (catch :default ex
-         (log/error ex)
-         (<! (api/finish
-              (assoc request
-                :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
-                :checkrun/conclusion "failure"
-                :checkrun/output
-                {:title "Lein Deploy error"
-                 :summary "There was an error running lein deploy"})
-              :failure
-              "failed to run lein deploy")))))))
+                        "_JAVA_OPTIONS" (str "-Duser.home=" atm-home)}))
+              exec-opts
+              {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
+              sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
+                                           exec-opts)
+              [err stdout stderr] (<! sub-process-port)]
+          (if err
+            (do
+              (log/error "process exited with code " (. err -code))
+              (<! (handler
+                   (assoc request
+                          :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                          :checkrun/conclusion "failure"
+                          :checkrun/output
+                          {:title "Leiningen Deploy Failure"
+                           :summary
+                           (str
+                            (apply str "stdout: \n" (take-last 150 stdout))
+                            (apply str
+                                   "\nstderr: \n"
+                                   (take-last 150 stderr)))}))))
+            (<! (handler
+                 (assoc request
+                        :atomist/summary (gstring/format "`lein deploy` success on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                        :checkrun/conclusion "success"
+                        :checkrun/output
+                        {:title "Leiningen Deploy Success"
+                         :summary (apply str (take-last 300 stdout))})))))
+        (catch :default ex
+          (log/error ex)
+          (<! (api/finish
+               (assoc request
+                      :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                      :checkrun/conclusion "failure"
+                      :checkrun/output
+                      {:title "Lein Deploy error"
+                       :summary "There was an error running lein deploy"})
+               :failure
+               "failed to run lein deploy")))))))
 
 (defn with-tag
   [handler]
