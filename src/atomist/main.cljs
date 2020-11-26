@@ -84,23 +84,23 @@
                       group-name (second (edn/read-string (io/slurp (io/file f "project.clj"))))
                       [group artifact-name] (str/split group-name #"/")
                      ;; for clojure where sometimes group is same as artifact
-                     artifact-name (or artifact-name group)]
-                 (<! (api/transact request [{:schema/entity-type :git/repo
-                                             :schema/entity "$repo"
-                                             :git.provider/url (:git.provider/url org)
-                                             :git.repo/source-id (:git.repo/source-id repo)}
-                                            {:schema/entity-type :git/commit
-                                             :schema/entity "$commit"
-                                             :git.provider/url (:git.provider/url org)
-                                             :git.commit/sha (:git.commit/sha commit)
-                                             :git.commit/repo "$repo"}
-                                            {:schema/entity-type :maven/artifact
-                                             :maven.artifact/commit "$commit"
-                                             :maven.artifact/name artifact-name
-                                             :maven.artifact/group group
-                                             :maven.artifact/version (:tag request)}])))
-               (catch :default ex
-                 (log/error "Error transacting deployed artifact " ex)))
+                      artifact-name (or artifact-name group)]
+                  (<! (api/transact request [{:schema/entity-type :git/repo
+                                              :schema/entity "$repo"
+                                              :git.provider/url (:git.provider/url org)
+                                              :git.repo/source-id (:git.repo/source-id repo)}
+                                             {:schema/entity-type :git/commit
+                                              :schema/entity "$commit"
+                                              :git.provider/url (:git.provider/url org)
+                                              :git.commit/sha (:git.commit/sha commit)
+                                              :git.commit/repo "$repo"}
+                                             {:schema/entity-type :maven/artifact
+                                              :maven.artifact/commit "$commit"
+                                              :maven.artifact/name artifact-name
+                                              :maven.artifact/group group
+                                              :maven.artifact/version (:tag request)}])))
+                (catch :default ex
+                  (log/error "Error transacting deployed artifact " ex)))
 
               (<! (handler
                    (assoc request
