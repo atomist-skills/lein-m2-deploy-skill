@@ -81,7 +81,7 @@
             (do
               (try
                 (let [[org commit repo] (-> request :subscription :result first)
-                      group-name (second (edn/read-string (io/slurp (io/file f "project.clj"))))
+                      group-name (str (second (edn/read-string (io/slurp (io/file f "project.clj")))))
                       [group artifact-name] (str/split group-name #"/")
                      ;; for clojure where sometimes group is same as artifact
                       artifact-name (or artifact-name group)]
