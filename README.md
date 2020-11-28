@@ -12,7 +12,7 @@ Watch for Commits where all of the following conditions are true:
 
 Upon detection, deploy the clojure library to a m2 repo, such as
 [clojars](https://clojars.org). Use the following procedure to perform this
-actions.
+action.
 
 -   clone the Commit using the Atomist GitHub App Installation token (this is
     the token used for all github related operations listed below)
@@ -28,6 +28,11 @@ If the deployment is successful, this skill also tracks the new maven artifact,
 and it's relationship to a the Commit, in the Atomist graph. Other skills can
 watch for this new artifact and choose to automatically update their own
 dependencies.
+
+This skill also allows users to restrict its action to a filter set of
+repositories in a GitHub organization; however, the skill is design to automate
+deployment for any leiningen project, now or in the future, that contains a
+clojure library.
 
 ## Todo
 

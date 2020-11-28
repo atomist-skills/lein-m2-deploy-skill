@@ -35,7 +35,8 @@
     :displayName "GitHub Checks",
     :name "check-names",
     :minRequired 0,
-    :required true}
+    :required true}}
+  {:string
    {:name "docker_cache",
     :displayName "Cache files or folders",
     :description "Cache and restore file system content between executions of this skill",
