@@ -121,6 +121,8 @@ value in that?
     is highly critical of GPG but maybe not so much about GPG for code signing.
     Although even there, the author suggests a tool like
     [minisign](https://jedisct1.github.io/minisign/) if you're signing files.
+- [presentation on different signing formats used across different platforms](https://cabforum.org/wp-content/uploads/7-code-signing-formats.pdf).  All of these, except perhaps GPG(PGP), rely on PKI infrastructure and CAs.  Java signing (with jarsigner and keytool), for example, is wholly reliant on certificate signing requests, and CAs.
+- [a high speed elliptic curve signing algo (Ed25519)](https://ed25519.cr.yp.to/ed25519-20110926.pdf)
 
 ---
 
