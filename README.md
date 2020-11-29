@@ -115,9 +115,13 @@ does is ensure that bad actors with access to an `org.clojure` deploy token,
 can't upload a bad clojure jar without leaving behind a trace in git. Is there
 value in that?
 
-* [link to one signing as a service company](https://about.signpath.io/documentation/signing-code#)
-* [another company doing pki as a service](https://www.keyfactor.com/business-need/accelerate-devops-security/)
-* [this article](https://latacora.micro.blog/2019/07/16/the-pgp-problem.html) is highly critical of GPG but maybe not so much about GPG for code signing.  Although even there, the author suggests a tool like [minisign](https://jedisct1.github.io/minisign/) if you're signing files.
+-   [link to one signing as a service company](https://about.signpath.io/documentation/signing-code#)
+-   [another company doing pki as a service](https://www.keyfactor.com/business-need/accelerate-devops-security/)
+-   [this article](https://latacora.micro.blog/2019/07/16/the-pgp-problem.html)
+    is highly critical of GPG but maybe not so much about GPG for code signing.
+    Although even there, the author suggests a tool like
+    [minisign](https://jedisct1.github.io/minisign/) if you're signing files.
+
 ---
 
 Created by [Atomist][atomist]. Need Help? [Join our Slack workspace][slack].
