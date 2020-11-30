@@ -1,0 +1,18 @@
+[:find
+ (pull ?commit [{:git.commit/repo [:git.repo/source-id
+                                   :git.repo/name
+                                   :git.provider/url
+                                   {:git.repo/org [:github.org/installation-token
+                                                   :git.org/name
+                                                   :git.provider/url]}]}])
+ :in $ $before-db %
+ :where
+ (get-config-value "branch-filters" ["^.*$"] ?branch-filters)
+ (get-config-value "default-branch-only" false ?default-only)
+ (get-config-value "tag?" false false)
+ (get-config-value "path-exists" ["Dockerfile"] ?path-exists)
+ (get-config-value "path-not-exists" ["Dockerfile" "docker/Dockerfile" "docker/Dockerfile.gcr"] ?path-not-exists)
+ (tx-push-with-content ?branch-filters ?default-only ?path-exists ?path-not-exists ?commit)
+ (get-config-value "check-names" [] ?check-run-names)
+ (check-runs-passed? ?check-run-names ?commit)
+ (repo-language ?repo "Clojure")]

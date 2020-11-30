@@ -1,0 +1,43 @@
+[:find (pull ?commit [{:git.commit/repo [:git.repo/source-id
+                                         :git.repo/name
+                                         :git.provider/url
+                                         {:git.repo/org [:github.org/installation-token
+                                                         :git.org/name
+                                                         :git.provider/url]}]}])
+
+ :in $ $before-db %
+ :where
+ (get-config-value "check-names" [] ?check-run-names)
+
+ ;; make sure we don't trigger ourselves
+ (tx-check-run ["lein-m2-deploy"] ?commit ?check-run)
+ [?check-run :github.checkrun/name ?check-run-name]
+ ;; make sure we only get triggered by our own configured checks
+ (array-contains? ?check-run-names ?check-run-name)
+ (check-runs-passed? ?check-run-names ?commit)
+
+ (get-config-value "branch-filters" ["^.*$"] ?branch-filters)
+ (get-config-value "default-branch-only" false ?default-only)
+ (get-config-value "tag?" false false)
+ (get-config-value "path-exists" ["Dockerfile"] ?path-exists)
+ (get-config-value "path-not-exists" ["Dockerfile" "docker/Dockerfile" "docker/Dockerfile.gcr"] ?path-not-exists)
+
+ (repo-language ?repo "Clojure")
+
+ ;; ensures we are at  the tip of the default branch
+
+ [?ref :git.ref/commit ?commit]
+ (or-join [?ref ?default-only ?branch-filters]
+   (and
+     [(true? ?default-only)]
+     (is-default-branch? ?ref))
+   (and
+     [(false? ?default-only)]
+     [?ref :git.ref/name ?branch-name]
+     (array-contains? ?branch-filters ?branch-name))
+   (and
+     [(false? ?default-only)]
+     [(empty? ?branch-filters)]))
+
+ (content-index-contains? ?commit "path-exists" ?path-exists)
+ (content-index-contains? ?commit "path-not-exists" ?path-not-exists)]
