@@ -8,6 +8,7 @@ Watch for Commits where all of the following conditions are true:
 -   a configurable set of GitHub CheckRuns has passed (configurable on the Skill
     config page)
 -   the root of the Repository contains a project.clj file
+-   GitHub has marked this Repo as containing `Clojure` code
 -   the Repository does not contain a Dockerfile, or a docker/Dockerfile
 
 Upon detection, deploy the clojure library to a m2 repo, such as
@@ -34,39 +35,62 @@ repositories in a GitHub organization; however, the skill is design to automate
 deployment for any leiningen project, now or in the future, that contains a
 clojure library.
 
-## Todo
+### Subscriptions
 
--   [ ] this only supports patch versioning today.  
-         If we respond to tags instead, we can put versioning back into the hands
-        of the developer.
--   [ ] we should document that we don't care what version is in the checked in
-        project.clj (which is a best practice in our opinion)
--   [ ] we should probably mention that this skill does not deploy snapshots,
-        and will therefore never use the `snapshots` repository. This is
-        `release` only (also a best practice).
--   [ ] we should also document the leiningen convention of configuring a
-        `releases` repo in either `:repositories` or `:deploy-repositories`.  
-         [Leiningen documentation](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md)
-        talks a lot about how to add credentials here but the beauty of this skill
-        is that we can inject the credentials from one place. However, it seems to
-        me we should also automatically update the project.clj to use our convention
-        before running. Why would leave a potential inconsistency between project.clj
-        and skill config if we can check it?
--   [ ] leiningen supports a strange property named `:deploy-branches`, which
-        could breaks this skill if the local project.clj has this property and
-        the default branch is not included in it
--   [ ] this skill will fail if the project.clj does not have a `:license`,
-        `:description` and `:url` We should make this error more explicit.
--   [ ] leiningen also supports https proxies here but Skill users should not
-        need these unless we're trying to publish to a private registry
-        accessibly only through a proxy. We probably want to ignore proxy
-        settings added by developers that are behind a proxy, and where the
-        skill does not have the same restriction.
--   [ ] whether or not we sign is determined by the `:sign-releases` option in
-        the repository opts map. Should we always set this to false?
--   [ ] the `:gpg-key` and `:passphrase` are the only real signing options, and
-        supporting these would require that we address whether or not we're will
-        to manage an identity for the skill configurer. See below.
+#### tag-with-content
+
+```
+When tags are created after all checks have passed on a Commit
+    -> do the deploy
+```
+
+#### push-with-content
+
+```
+When a branch ref with content rules shows leiningen and check rules have all passed
+    -> create a tag if tag?=true and deploy
+```
+
+#### checked-commit
+
+```
+When all CheckRuns have passed
+    -> possibly create a Tag if needed, and then deploy
+```
+
+When a new CheckRun
+
+if skill is configured with `tag?` config parameter set to true
+
+```
+(get-config-value "tag?" false true)
+```
+
+and a tag has been pushed in this change
+
+```
+
+```
+
+and there's a project.clj file but no Docker files
+
+```
+(get-config-value "path-exists" ["project.clj"] ?path-exists)
+(get-config-value "path-not-exists" ["Dockerfile" "docker/Dockerfile" "docker/Dockerfile.gcr"] ?path-not-exists)
+```
+
+### no updates to project.clj
+
+Although many skills do push updates to Repo contents, our default
+implementation of this skill does not update `project.clj` with new versions. We
+encourage the use of git tags as being the sole source of truth for a released
+version. To that end, this skill can be configured to either only build tagged
+Commits, or to create tags, when the release conditions are met, and then use
+the tag version for the deployment. We edit the project.clj locally, so that we
+can use the `lein deploy` task unaltered. However, we allow the checked in
+project.clj version to remain permanently out of sync with the deployed version.
+If you want to see the most recently deployed version, use `git describe`
+instead.
 
 ## Should we sign either jars or tags?
 

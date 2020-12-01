@@ -28,6 +28,14 @@
             [clojure.edn :as edn]
             [clojure.string :as str]))
 
+(defn add-tag-to-request
+  [handler]
+  (fn [request]
+    (go
+     (<! (handler (merge request
+                         (if false
+                          {:atomist.main/tag ""})))))))
+
 (defn create-ref-from-event
   [handler]
   (fn [request]
@@ -126,40 +134,46 @@
   (fn [request]
     ;; report Check failures
     (go
-      (let [context (merge
-                     (:ref request)
-                     {:token (:token request)}
-                     {:path (-> request :project :path)})]
-        (log/infof "with-tag starting on ref %s at path %s" (:ref request) (:path context))
-        (let [{:keys [response]}
-              (<! (atomist.gitflows/no-errors
-                   (go context)
-                   [[:async-git git/fetch-tags]
-                    [:async-git git/git-rev-list]
-                    [:async-git git/git-describe-tags]
-                    [:sync #(assoc % :tag (gitflows/next-version (s/trim (:stdout %))))]
-                    [:async (fn [{:keys [tag] :as context}]
-                              (go
+     (if (and
+          (:tag? request)
+          (:atomist.main/tag request))
+       (let [context (merge
+                      (:ref request)
+                      {:token (:token request)}
+                      {:path (-> request :project :path)})]
+         (log/infof "with-tag starting on ref %s at path %s" (:ref request) (:path context))
+         (let [{:keys [response]}
+               (<! (atomist.gitflows/no-errors
+                    (go context)
+                    [[:async-git git/fetch-tags]
+                     [:async-git git/git-rev-list]
+                     [:async-git git/git-describe-tags]
+                     [:sync #(assoc % :tag (gitflows/next-version (s/trim (:stdout %))))]
+                     [:async (fn [{:keys [tag] :as context}]
+                               (go
                                 (let [response (<! (handler (assoc request :tag tag)))]
                                   (merge
                                    context
                                    {:response response}
                                    (if (= "failure" (:checkrun/conclusion response))
                                      {:error true})))))]
-                    [:async-git git/tag]
-                    [:async-git git/push-tag]]))]
-          response)))))
+                     [:async-git git/tag]
+                     [:async-git git/push-tag]]))]
+           response))
+       ;; TODO tag is in subscription
+       (<! (handler (assoc request :tag "")))))))
 
 (defn ^:export handler
   [& args]
   ((-> (api/finished :success "handled event in lein m2 deploy skill")
-
        (run-leiningen-if-present (fn [request]
                                    (gstring/format "change version set '\"%s\"' && lein deploy" (:tag request))))
        (with-tag)
        (api/clone-ref)
        (api/with-github-check-run :name "lein-m2-deploy")
+       (add-tag-to-request)
        (create-ref-from-event)
+       (api/add-skill-config)
        (api/status :send-status (fn [{:atomist/keys [summary]}] summary))
        (container/mw-make-container-request))
    {}))
