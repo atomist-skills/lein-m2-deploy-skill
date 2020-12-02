@@ -33,18 +33,18 @@
  [{:stringArray
    {:name "docker_cache",
     :displayName "Cache files or folders",
-    :defaultValue ".m2/**"
+    :defaultValue [".m2/**"]
     :visibility "hidden"
     :description "Cache and restore file system content between executions of this skill",
     :required false}}
   {:stringArray
    {:name "path-not-exists"
     :displayName "Do not deploy from repos that contain these files"
-    :description "Existence of these files means that this Leiningen Repo should be skipped"
+    :description "Existence of these files means that this tag should be skipped"
     :placeHolder "Dockerfile"
     :required false}}
   {:repoFilter
-   {:description "The set of Repositories.",
+   {:description "The set of repositories to monitor for tags",
     :displayName "Repository Scope",
     :name "scope",
     :required true}}],

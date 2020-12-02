@@ -13,7 +13,7 @@
  (tx-tag ?commit ?ref)
 
  (get-config-value "path-exists" ["project.clj"] ?path-exists)
- (get-config-value "path-not-exists" ["Dockerfile" "docker/Dockerfile"] ?path-not-exists)
+ (get-config-value "path-not-exists" [] ?path-not-exists)
  (content-index-contains? ?commit "path-exists" ?path-exists)
  (content-index-contains? ?commit "path-not-exists" ?path-not-exists)
 

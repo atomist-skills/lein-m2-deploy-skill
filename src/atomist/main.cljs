@@ -22,7 +22,6 @@
             [goog.string :as gstring]
             [atomist.proc :as proc]
             [atomist.cljs-log :as log]
-            [clojure.string :as s]
             [clojure.edn :as edn]
             [clojure.string :as str]))
 
