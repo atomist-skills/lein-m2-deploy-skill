@@ -10,7 +10,11 @@
                                                    :git.provider/url]}]}])
  :in $ $before-db %
  :where
- (tx-tag ?commit ?ref)
+ (tx-entity :git/ref ?ref)
+ [?ref :git.ref/type :git.ref.type/branch]
+ [?ref :git.ref/commit ?commit]
+ [?commit :git.commit/repo ?repo]
+ ;(tx-tag ?commit ?ref)
 
  ;(get-config-value "path-exists" ["project.clj"] ?path-exists)
  ;(get-config-value "path-not-exists" [] ?path-not-exists)
