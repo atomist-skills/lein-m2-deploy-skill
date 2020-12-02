@@ -12,10 +12,12 @@
  :where
  (tx-tag ?commit ?ref)
 
- (get-config-value "path-exists" ["project.clj"] ?path-exists)
- (get-config-value "path-not-exists" [] ?path-not-exists)
- (content-index-contains? ?commit "path-exists" ?path-exists)
- (content-index-contains? ?commit "path-not-exists" ?path-not-exists)
+ ;(get-config-value "path-exists" ["project.clj"] ?path-exists)
+ ;(get-config-value "path-not-exists" [] ?path-not-exists)
+ ;(content-index-contains? ?commit "path-exists" ?path-exists)
+ ;(content-index-contains? ?commit "path-not-exists" ?path-not-exists)
+ ;
+ ;[?commit :git.commit/repo ?repo]
+ ;(repo-language ?repo "Clojure")
 
- [?commit :git.commit/repo ?repo]
- (repo-language ?repo "Clojure")]
+ ]
