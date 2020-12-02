@@ -2,11 +2,11 @@
 
 ## Background
 
-Watch for Commits where all of the following conditions are true:
+Watch for Tags on repositories, that contain Leiningen project.clj files, and do
+not contain Dockerfiles.  
+The following conditions must be true:
 
--   Commit was made to the default branch of a Repository in GitHub
--   a configurable set of GitHub CheckRuns has passed (configurable on the Skill
-    config page)
+-   a git Tag ref has been created
 -   the root of the Repository contains a project.clj file
 -   GitHub has marked this Repo as containing `Clojure` code
 -   the Repository does not contain a Dockerfile, or a docker/Dockerfile
@@ -40,22 +40,7 @@ clojure library.
 #### tag-with-content
 
 ```
-When tags are created after all checks have passed on a Commit
-    -> do the deploy
-```
-
-#### push-with-content
-
-```
-When a branch ref with content rules shows leiningen and check rules have all passed
-    -> create a tag if tag?=true and deploy
-```
-
-#### checked-commit
-
-```
-When all CheckRuns have passed
-    -> possibly create a Tag if needed, and then deploy
+When tags are created after all checks have passed on a Commit then run the Leiningen deploy task.
 ```
 
 When a new CheckRun
