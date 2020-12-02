@@ -10,18 +10,13 @@
                                                    :git.provider/url]}]}])
  :in $ $before-db %
  :where
- (tx-entity :git/ref ?ref)
- [?ref :git.ref/type :git.ref.type/branch]
- [?ref :git.ref/commit ?commit]
+
+ (tx-tag ?commit ?ref)
+
+ (get-config-value "path-exists" ["project.clj"] ?path-exists)
+ (get-config-value "path-not-exists" [] ?path-not-exists)
+ (content-index-contains? ?commit "path-exists" ?path-exists)
+ (content-index-contains? ?commit "path-not-exists" ?path-not-exists)
+
  [?commit :git.commit/repo ?repo]
- ;(tx-tag ?commit ?ref)
-
- ;(get-config-value "path-exists" ["project.clj"] ?path-exists)
- ;(get-config-value "path-not-exists" [] ?path-not-exists)
- ;(content-index-contains? ?commit "path-exists" ?path-exists)
- ;(content-index-contains? ?commit "path-not-exists" ?path-not-exists)
- ;
- ;[?commit :git.commit/repo ?repo]
- ;(repo-language ?repo "Clojure")
-
- ]
+ (repo-language ?repo "Clojure")]
