@@ -29,19 +29,18 @@
   [handler]
   (fn [request]
     (go
-      (let [{refs :git.ref/_commit} (-> request :subscription :result first)]
-        (<! (handler (merge request
-                            (if-let [tag (->> refs
-                                              (filter #(= :git.ref.type/tag (-> % :git.ref/type :db/ident)))
-                                              first
-                                              :git.ref/name)]
-                              {:atomist.main/tag tag}))))))))
+      (log/info "add-tag results " (-> request :subscription :result first second))
+      (if-let [{:git.ref/keys [name type]} (->> (-> request :subscription :result first second)
+                                                (filter #(= (:git.ref/type %) :git.ref.type/tag))
+                                                (first))]
+        (<! (handler (assoc request :atomist.main/tag name)))
+        (<! (handler request))))))
 
 (defn create-ref-from-event
   [handler]
   (fn [request]
     (go
-      (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first)]
+      (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
         (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
                                           :owner (-> repo :git.repo/org :git.org/name)
                                           :sha sha}
@@ -56,6 +55,7 @@
   [handler]
   (fn [request]
     (go
+      (log/infof "add-deploy profile for deploying %s" (:atomist.main/tag request))
       (<! (handler request)))))
 
 (defn run-leiningen
