@@ -45,7 +45,7 @@
         (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
                                           :owner (-> repo :git.repo/org :git.org/name)
                                           :sha sha}
-                            :token (-> repo :git.repo/org :git.org/installation-token))))))))
+                            :token (-> repo :git.repo/org :github.org/installation-token))))))))
 
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
