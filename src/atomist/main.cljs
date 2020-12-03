@@ -62,8 +62,8 @@
        (pr-str
         {:lein-m2-deploy
          {:repositories [["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
-                                      :username [:env/mvn_artifactorymavenrepository_user]
-                                      :password [:env/mvn_artifactorymavenrepository_pwd]
+                                      :username (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
+                                      :password (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
                                       :sign-releases false}]]}}))
       (<! (handler request)))))
 
@@ -76,11 +76,7 @@
         (let [f (io/file (-> request :project :path))
               env (-> (-js->clj+ (.. js/process -env))
                       (merge
-                       {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
-                        (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
-                        "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
-                        (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
-                        "_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
+                       {"_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
               exec-opts {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
               sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
                                            exec-opts)
@@ -161,8 +157,8 @@
        (api/with-github-check-run :name "lein-m2-deploy")
        (add-tag-to-request)
        (create-ref-from-event)
-       (api/add-skill-config)
        (api/add-resource-providers)
+       (api/add-skill-config)
        (api/log-event)
        (api/status :send-status (fn [{:atomist/keys [summary]}] summary))
        (container/mw-make-container-request))
