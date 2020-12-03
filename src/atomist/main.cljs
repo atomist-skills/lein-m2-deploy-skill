@@ -156,7 +156,7 @@
   ((-> (api/finished :success "handled event in lein m2 deploy skill")
        (run-leiningen (fn [request]
                         (gstring/format "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy" (:atomist.main/tag request))))
-       (add-deploy-profile)
+       ;;(add-deploy-profile)
        (api/clone-ref)
        (api/with-github-check-run :name "lein-m2-deploy")
        (add-tag-to-request)
