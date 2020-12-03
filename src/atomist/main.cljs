@@ -148,6 +148,7 @@
        (add-tag-to-request)
        (create-ref-from-event)
        (api/add-skill-config)
+       (api/log-event)
        (api/status :send-status (fn [{:atomist/keys [summary]}] summary))
        (container/mw-make-container-request))
    {}))
