@@ -52,7 +52,7 @@
   [handler]
   (fn [request]
     (go
-      (log/infof "Found resource providers: %s" (:atomist/resource-providers request))
+     ;(log/infof "Found resource providers: %s" (:atomist/resource-providers request))
       (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s"
                  (:atomist.main/tag request)
                  "https://sforzando.jfrog.io/sforzando/libs-release-local"
@@ -162,7 +162,7 @@
        (add-tag-to-request)
        (create-ref-from-event)
        (api/add-skill-config)
-       (api/add-resource-providers)
+       ;;(api/add-resource-providers)
        (api/log-event)
        (api/status :send-status (fn [{:atomist/keys [summary]}] summary))
        (container/mw-make-container-request))
