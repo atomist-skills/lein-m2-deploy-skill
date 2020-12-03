@@ -57,12 +57,12 @@
                  "https://sforzando.jfrog.io/sforzando/libs-release-local")
       (io/spit
        (io/file (-> request :project :path) "profiles.clj")
-       (pr-str {:profiles
-                {:lein-m2-deploy
-                 {:repositories [["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
-                                              :username [:env/mvn_artifactorymavenrepository_user]
-                                              :password [:env/mvn_artifactorymavenrepository_pwd]
-                                              :sign-releases false}]]}}}))
+       (pr-str
+        {:lein-m2-deploy
+         {:repositories [["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
+                                      :username [:env/mvn_artifactorymavenrepository_user]
+                                      :password [:env/mvn_artifactorymavenrepository_pwd]
+                                      :sign-releases false}]]}}))
       (<! (handler request)))))
 
 (defn run-leiningen
