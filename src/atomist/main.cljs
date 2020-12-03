@@ -29,10 +29,7 @@
   [handler]
   (fn [request]
     (go
-      (log/info "add-tag results " (-> request :subscription :result first second))
-      (if-let [{:git.ref/keys [name type]} (->> (-> request :subscription :result first second)
-                                                (filter #(= (:git.ref/type %) :git.ref.type/tag))
-                                                (first))]
+      (if-let [{:git.ref/keys [name type]} (-> request :subscription :result first second)]
         (<! (handler (assoc request :atomist.main/tag name)))
         (<! (handler request))))))
 
@@ -64,17 +61,14 @@
     (go
       (try
         (api/trace "run-leiningen-if-present")
-       ;; TODO we can stop using the ATOMIST_HOME entirely
-        (let [atm-home (.. js/process -env -ATOMIST_HOME)
-              f (io/file (-> request :project :path))
+        (let [f (io/file (-> request :project :path))
               env (-> (-js->clj+ (.. js/process -env))
                       (merge
                        {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
                         (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
                         "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
                         (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
-                       ;; use atm-home for .m2 directory
-                        "_JAVA_OPTIONS" (str "-Duser.home=" atm-home)}))
+                        "_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
               exec-opts {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
               sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
                                            exec-opts)
@@ -120,7 +114,11 @@
 
               (<! (handler
                    (assoc request
-                          :atomist/summary (gstring/format "`lein deploy` success on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                          :atomist/summary (gstring/format
+                                            "`lein deploy` success on %s/%s:%s"
+                                            (-> request :ref :owner)
+                                            (-> request :ref :repo)
+                                            (-> request :ref :sha))
                           :checkrun/conclusion "success"
                           :checkrun/output
                           {:title "Leiningen Deploy Success"
@@ -129,7 +127,11 @@
           (log/error ex)
           (<! (api/finish
                (assoc request
-                      :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                      :atomist/summary (gstring/format
+                                        "`lein deploy` error on %s/%s:%s"
+                                        (-> request :ref :owner)
+                                        (-> request :ref :repo)
+                                        (-> request :ref :sha))
                       :checkrun/conclusion "failure"
                       :checkrun/output
                       {:title "Lein Deploy error"
