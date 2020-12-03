@@ -52,7 +52,17 @@
   [handler]
   (fn [request]
     (go
-      (log/infof "add-deploy profile for deploying %s" (:atomist.main/tag request))
+      (log/infof "add-deploy profiles.clj profile for deploying %s to %s"
+                 (:atomist.main/tag request)
+                 "https://sforzando.jfrog.io/sforzando/libs-release-local")
+      (io/spit
+       (io/file (-> request :project :path) "profiles.clj")
+       (pr-str {:profiles
+                {:lein-m2-deploy
+                 {:repositories [["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
+                                              :username [:env/mvn_artifactorymavenrepository_user]
+                                              :password [:env/mvn_artifactorymavenrepository_pwd]
+                                              :sign-releases false}]]}}}))
       (<! (handler request)))))
 
 (defn run-leiningen
@@ -143,7 +153,7 @@
   [& args]
   ((-> (api/finished :success "handled event in lein m2 deploy skill")
        (run-leiningen (fn [request]
-                        (gstring/format "change version set '\"%s\"' && lein deploy" (:atomist.main/tag request))))
+                        (gstring/format "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy" (:atomist.main/tag request))))
        (add-deploy-profile)
        (api/clone-ref)
        (api/with-github-check-run :name "lein-m2-deploy")
