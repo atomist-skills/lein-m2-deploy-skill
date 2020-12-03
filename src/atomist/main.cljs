@@ -56,7 +56,7 @@
       (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s"
                  (:atomist.main/tag request)
                  "https://sforzando.jfrog.io/sforzando/libs-release-local"
-                 (or (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER) nil))
+                 (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER))
       (io/spit
        (io/file (-> request :project :path) "profiles.clj")
        (pr-str
