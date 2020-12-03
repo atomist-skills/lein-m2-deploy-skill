@@ -52,6 +52,7 @@
   [handler]
   (fn [request]
     (go
+     (log/infof "Found resource providers: %s" (:atomist/resource-providers request))
       (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s"
                  (:atomist.main/tag request)
                  "https://sforzando.jfrog.io/sforzando/libs-release-local"
@@ -75,7 +76,8 @@
         (let [f (io/file (-> request :project :path))
               env (-> (-js->clj+ (.. js/process -env))
                       (merge
-                       {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
+                       {
+                        "MVN_ARTIFACTORYMAVENREPOSITORY_USER"
                         (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
                         "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
                         (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
@@ -161,6 +163,7 @@
        (add-tag-to-request)
        (create-ref-from-event)
        (api/add-skill-config)
+       (api/add-resource-providers)
        (api/log-event)
        (api/status :send-status (fn [{:atomist/keys [summary]}] summary))
        (container/mw-make-container-request))
