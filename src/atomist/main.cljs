@@ -52,9 +52,10 @@
   [handler]
   (fn [request]
     (go
-      (log/infof "add-deploy profiles.clj profile for deploying %s to %s"
+      (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s"
                  (:atomist.main/tag request)
-                 "https://sforzando.jfrog.io/sforzando/libs-release-local")
+                 "https://sforzando.jfrog.io/sforzando/libs-release-local"
+                 (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER))
       (io/spit
        (io/file (-> request :project :path) "profiles.clj")
        (pr-str
