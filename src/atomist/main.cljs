@@ -76,11 +76,7 @@
         (let [f (io/file (-> request :project :path))
               env (-> (-js->clj+ (.. js/process -env))
                       (merge
-                       {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
-                        (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
-                        "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
-                        (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
-                        "_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
+                       {"_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
               exec-opts {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
               sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
                                            exec-opts)
@@ -156,7 +152,7 @@
   ((-> (api/finished :success "handled event in lein m2 deploy skill")
        (run-leiningen (fn [request]
                         (gstring/format "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy" (:atomist.main/tag request))))
-       ;;(add-deploy-profile)
+       (add-deploy-profile)
        (api/clone-ref)
        (api/with-github-check-run :name "lein-m2-deploy")
        (add-tag-to-request)
