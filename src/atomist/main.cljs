@@ -55,7 +55,16 @@
       (let [url (-> request :atomist/resource-providers :releases first :url)
             username (-> request :atomist/resource-providers :releases first :credential :owner :login)
             password (-> request :atomist/resource-providers :releases first :credential :secret)]
-        (log/infof "Found resource providers: %s" (:atomist/resource-providers request))
+        (log/infof "Found resolve resource providers: %s"
+                   (->> (-> request :atomist/resource-providers :resolve)
+                        (map #(gstring/format "%s - %s (%s)" (:id %) (:url %) (:name %)))
+                        (interpose ", ")
+                        (apply str)))
+        (log/infof "Found releases resource providers: %s"
+                   (->> (-> request :atomist/resource-providers :resolve)
+                        (map #(gstring/format "%s - %s (%s)" (:id %) (:url %) (:name %)))
+                        (interpose ", ")
+                        (apply str)))
         (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s and password %s"
                    (:atomist.main/tag request)
                    url
@@ -91,6 +100,7 @@
               (<! (handler
                    (assoc request
                           :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                          :atomist.status/report :failed
                           :checkrun/conclusion "failure"
                           :checkrun/output
                           {:title "Leiningen Deploy Failure"
@@ -153,7 +163,7 @@
 
 (defn ^:export handler
   [& args]
-  ((-> (api/finished :success "handled event in lein m2 deploy skill")
+  ((-> (api/finished)
        (run-leiningen (fn [request]
                         (gstring/format "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy" (:atomist.main/tag request))))
        (add-deploy-profile)
