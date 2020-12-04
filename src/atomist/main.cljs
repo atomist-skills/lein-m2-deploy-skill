@@ -29,19 +29,19 @@
   [handler]
   (fn [request]
     (go
-      (if-let [{:git.ref/keys [name type]} (-> request :subscription :result first second)]
-        (<! (handler (assoc request :atomist.main/tag name)))
-        (<! (handler request))))))
+     (if-let [{:git.ref/keys [name type]} (-> request :subscription :result first second)]
+       (<! (handler (assoc request :atomist.main/tag name)))
+       (<! (handler request))))))
 
 (defn create-ref-from-event
   [handler]
   (fn [request]
     (go
-      (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
-        (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
-                                          :owner (-> repo :git.repo/org :git.org/name)
-                                          :sha sha}
-                            :token (-> repo :git.repo/org :github.org/installation-token))))))))
+     (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
+       (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
+                                         :owner (-> repo :git.repo/org :git.org/name)
+                                         :sha sha}
+                                   :token (-> repo :git.repo/org :github.org/installation-token))))))))
 
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
@@ -52,114 +52,121 @@
   [handler]
   (fn [request]
     (go
-      (let [url (-> request :atomist/resource-providers :releases first :url)
-            username (-> request :atomist/resource-providers :releases first :credential :owner :login)
-            password (-> request :atomist/resource-providers :releases first :credential :secret)]
-        (log/infof "Found resolve resource providers: %s"
-                   (->> (-> request :atomist/resource-providers :resolve)
-                        (map #(gstring/format "%s - %s (%s)" (:id %) (:url %) (:name %)))
-                        (interpose ", ")
-                        (apply str)))
-        (log/infof "Found releases resource providers: %s"
-                   (->> (-> request :atomist/resource-providers :resolve)
-                        (map #(gstring/format "%s - %s (%s)" (:id %) (:url %) (:name %)))
-                        (interpose ", ")
-                        (apply str)))
-        (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s and password %s"
-                   (:atomist.main/tag request)
-                   url
-                   username
-                   (apply str (take (count password) (repeat 'X))))
-        (io/spit
-         (io/file (-> request :project :path) "profiles.clj")
-         (pr-str
-          {:lein-m2-deploy
-           {:repositories [["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
-                                        :username username
-                                        :password password
-                                        :sign-releases false}]]}})))
-      (<! (handler request)))))
+     (let [url (-> request :atomist/resource-providers :releases first :url)
+           username (-> request :atomist/resource-providers :releases first :credential :owner :login)
+           password (-> request :atomist/resource-providers :releases first :credential :secret)]
+       (log/infof "Found resolve resource providers: %s"
+                  (->> (-> request :atomist/resource-providers :resolve)
+                       (map #(gstring/format "%s - %s (%s)" (:id %) (:url %) (:name %)))
+                       (interpose ", ")
+                       (apply str)))
+       (log/infof "Found releases resource providers: %s"
+                  (->> (-> request :atomist/resource-providers :releases)
+                       (map #(gstring/format "%s - %s (%s)" (:id %) (:url %) (:name %)))
+                       (interpose ", ")
+                       (apply str)))
+       (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s and password %s"
+                  (:atomist.main/tag request)
+                  url
+                  username
+                  (apply str (take (count password) (repeat 'X))))
+       (io/spit
+        (io/file (-> request :project :path) "profiles.clj")
+        (pr-str
+         {:lein-m2-deploy
+          {:repositories [(->> ["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
+                                            :username username
+                                            :password password
+                                            :sign-releases false}]
+                               (concat
+                                (->> (-> request :atomist/resource-providers :resolve)
+                                     (map (fn [{:keys [url credential]}]
+                                            [name {:url url
+                                                   :username (-> credential :owner :login)
+                                                   :password (-> credential :secret)}]))))
+                               (into []))]}})))
+     (<! (handler request)))))
 
 (defn run-leiningen
   [handler lein-args-fn]
   (fn [request]
     (go
-      (try
-        (api/trace "run-leiningen-if-present")
-        (let [f (io/file (-> request :project :path))
-              env (-> (-js->clj+ (.. js/process -env))
-                      (merge
-                       {"_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
-              exec-opts {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
-              sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
-                                           exec-opts)
-              [err stdout stderr] (<! sub-process-port)]
-          (if err
-            (do
-              (log/error "process exited with code " (. err -code))
-              (<! (handler
-                   (assoc request
-                          :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
-                          :atomist.status/report :failed
-                          :checkrun/conclusion "failure"
-                          :checkrun/output
-                          {:title "Leiningen Deploy Failure"
-                           :summary
-                           (str
-                            (apply str "stdout: \n" (take-last 150 stdout))
-                            (apply str
-                                   "\nstderr: \n"
-                                   (take-last 150 stderr)))}))))
-            (do
-              (try
-                (let [[org commit repo] (-> request :subscription :result first)
-                      group-name (str (second (edn/read-string (io/slurp (io/file f "project.clj")))))
-                      [group artifact-name] (str/split group-name #"/")
+     (try
+       (api/trace "run-leiningen-if-present")
+       (let [f (io/file (-> request :project :path))
+             env (-> (-js->clj+ (.. js/process -env))
+                     (merge
+                      {"_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
+             exec-opts {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
+             sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
+                                          exec-opts)
+             [err stdout stderr] (<! sub-process-port)]
+         (if err
+           (do
+             (log/error "process exited with code " (. err -code))
+             (<! (handler
+                  (assoc request
+                    :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                    :atomist.status/report :failed
+                    :checkrun/conclusion "failure"
+                    :checkrun/output
+                    {:title "Leiningen Deploy Failure"
+                     :summary
+                     (str
+                      (apply str "stdout: \n" (take-last 150 stdout))
+                      (apply str
+                             "\nstderr: \n"
+                             (take-last 150 stderr)))}))))
+           (do
+             (try
+               (let [[org commit repo] (-> request :subscription :result first)
+                     group-name (str (second (edn/read-string (io/slurp (io/file f "project.clj")))))
+                     [group artifact-name] (str/split group-name #"/")
                      ;; for clojure where sometimes group is same as artifact
-                      artifact-name (or artifact-name group)]
-                  (<! (api/transact request [{:schema/entity-type :git/repo
-                                              :schema/entity "$repo"
-                                              :git.provider/url (:git.provider/url org)
-                                              :git.repo/source-id (:git.repo/source-id repo)}
-                                             {:schema/entity-type :git/commit
-                                              :schema/entity "$commit"
-                                              :git.provider/url (:git.provider/url org)
-                                              :git.commit/sha (:git.commit/sha commit)
-                                              :git.commit/repo "$repo"}
-                                             {:schema/entity-type :maven/artifact
-                                              :maven.artifact/commit "$commit"
-                                              :maven.artifact/name artifact-name
-                                              :maven.artifact/group group
-                                              :maven.artifact/version (:tag request)}])))
-                (catch :default ex
-                  (log/error "Error transacting deployed artifact " ex)))
+                     artifact-name (or artifact-name group)]
+                 (<! (api/transact request [{:schema/entity-type :git/repo
+                                             :schema/entity "$repo"
+                                             :git.provider/url (:git.provider/url org)
+                                             :git.repo/source-id (:git.repo/source-id repo)}
+                                            {:schema/entity-type :git/commit
+                                             :schema/entity "$commit"
+                                             :git.provider/url (:git.provider/url org)
+                                             :git.commit/sha (:git.commit/sha commit)
+                                             :git.commit/repo "$repo"}
+                                            {:schema/entity-type :maven/artifact
+                                             :maven.artifact/commit "$commit"
+                                             :maven.artifact/name artifact-name
+                                             :maven.artifact/group group
+                                             :maven.artifact/version (:tag request)}])))
+               (catch :default ex
+                 (log/error "Error transacting deployed artifact " ex)))
 
-              (<! (handler
-                   (assoc request
-                          :atomist/summary (gstring/format
-                                            "`lein deploy` success on %s/%s:%s"
-                                            (-> request :ref :owner)
-                                            (-> request :ref :repo)
-                                            (-> request :ref :sha))
-                          :checkrun/conclusion "success"
-                          :checkrun/output
-                          {:title "Leiningen Deploy Success"
-                           :summary (apply str (take-last 300 stdout))}))))))
-        (catch :default ex
-          (log/error ex)
-          (<! (api/finish
-               (assoc request
-                      :atomist/summary (gstring/format
-                                        "`lein deploy` error on %s/%s:%s"
-                                        (-> request :ref :owner)
-                                        (-> request :ref :repo)
-                                        (-> request :ref :sha))
-                      :checkrun/conclusion "failure"
-                      :checkrun/output
-                      {:title "Lein Deploy error"
-                       :summary "There was an error running lein deploy"})
-               :failure
-               "failed to run lein deploy")))))))
+             (<! (handler
+                  (assoc request
+                    :atomist/summary (gstring/format
+                                      "`lein deploy` success on %s/%s:%s"
+                                      (-> request :ref :owner)
+                                      (-> request :ref :repo)
+                                      (-> request :ref :sha))
+                    :checkrun/conclusion "success"
+                    :checkrun/output
+                    {:title "Leiningen Deploy Success"
+                     :summary (apply str (take-last 300 stdout))}))))))
+       (catch :default ex
+         (log/error ex)
+         (<! (api/finish
+              (assoc request
+                :atomist/summary (gstring/format
+                                  "`lein deploy` error on %s/%s:%s"
+                                  (-> request :ref :owner)
+                                  (-> request :ref :repo)
+                                  (-> request :ref :sha))
+                :checkrun/conclusion "failure"
+                :checkrun/output
+                {:title "Lein Deploy error"
+                 :summary "There was an error running lein deploy"})
+              :failure
+              "failed to run lein deploy")))))))
 
 (defn ^:export handler
   [& args]
