@@ -9,7 +9,7 @@
     "atm:lint:prettier": "prettier --write"
   },
   "dependencies": {
-    "@atomist/api-cljs": "^0.4.141",
+    "@atomist/api-cljs": "^0.4.142",
     "js-yaml": "^3.14.0"
   },
   "devDependencies": {
