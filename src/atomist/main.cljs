@@ -52,19 +52,23 @@
   [handler]
   (fn [request]
     (go
-      (log/infof "Found resource providers: %s" (:atomist/resource-providers request))
-      (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s"
-                 (:atomist.main/tag request)
-                 "https://sforzando.jfrog.io/sforzando/libs-release-local"
-                 (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER))
-      (io/spit
-       (io/file (-> request :project :path) "profiles.clj")
-       (pr-str
-        {:lein-m2-deploy
-         {:repositories [["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
-                                      :username (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_USER)
-                                      :password (.. js/process -env -MVN_ARTIFACTORYMAVENREPOSITORY_PWD)
-                                      :sign-releases false}]]}}))
+      (let [url (-> request :atomist/resource-providers :releases first :url)
+            username (-> request :atomist/resource-providers :releases first :credential :owner :login)
+            password (-> request :atomist/resource-providers :releases first :credential :secret)]
+        (log/infof "Found resource providers: %s" (:atomist/resource-providers request))
+        (log/infof "add-deploy profiles.clj profile for deploying %s to %s with user %s and password %s"
+                   (:atomist.main/tag request)
+                   url
+                   username
+                   (apply str (take (count password) (repeat 'X))))
+        (io/spit
+         (io/file (-> request :project :path) "profiles.clj")
+         (pr-str
+          {:lein-m2-deploy
+           {:repositories [["releases" {:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
+                                        :username username
+                                        :password password
+                                        :sign-releases false}]]}})))
       (<! (handler request)))))
 
 (defn run-leiningen
