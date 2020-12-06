@@ -18,4 +18,4 @@ package:
   command: npm ci && npm run skill
   tag: default-branch-only
 
-kick: 5
+kick: 6
