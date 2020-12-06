@@ -2,14 +2,14 @@
 
 ## Background
 
-Watch for Tags on repositories, that contain Leiningen project.clj files, and do
-not contain Dockerfiles.  
+Watch for Tags on repositories that contain Leiningen project.clj files.  
 The following conditions must be true:
 
 -   a git Tag ref has been created
 -   the root of the Repository contains a project.clj file
 -   GitHub has marked this Repo as containing `Clojure` code
--   the Repository does not contain a Dockerfile, or a docker/Dockerfile
+-   the Skill can be configured to skip Repositories that contain specified
+    files (like a `Dockerfile`)
 
 Upon detection, deploy the clojure library to a m2 repo, such as
 [clojars](https://clojars.org). Use the following procedure to perform this
@@ -24,6 +24,11 @@ action.
     `lein deploy`
 -   update the "lein m2 deploy" CheckRun based on whether the artifact was
     successfully published
+-   this skill over-rides any `"releases"` deploy-repository configured in the
+    project.clj, with the one selected when configuring this skill. Repositories
+    for downloading dependencies can also be specified here but they are always
+    added to the ones already configured in a project.clj. Only the release
+    repository for deployments is over-ridden.
 
 If the deployment is successful, this skill also tracks the new maven artifact,
 and it's relationship to a the Commit, in the Atomist graph. Other skills can

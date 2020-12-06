@@ -23,7 +23,12 @@
  :homepageUrl "https://github.com/atomist-skills/lein-m2-deploy-skill",
  :namespace "atomist",
  :resourceProviders
- [{:name "releases",
+ [{:name "github",
+   :description "GitHub",
+   :typeName "GitHubAppResourceProvider",
+   :minRequired 1,
+   :maxAllowed 1}
+  {:name "releases",
    :description
    "Maven repository for deploying artifacts referenced in project.clj",
    :typeName "MavenRepositoryProvider",
@@ -44,7 +49,7 @@
     :required false}}
   {:stringArray
    {:name "path-not-exists"
-    :displayName "Do not deploy from repos that contain these files"
+    :displayName "Do not deploy from any repos that contain files from this set of glob expressions"
     :description "Existence of these files means that this tag should be skipped"
     :placeHolder "Dockerfile"
     :required false}}
