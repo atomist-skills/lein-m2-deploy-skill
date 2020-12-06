@@ -6,8 +6,7 @@ whenever the following conditions are detected:
 
 1. the Repository contains a project.clj file (users can configure exclude
    criteria - see Settings)
-2. a Commit has been tagged with a semver compliant name. Users can also choose
-   to restrict deployments to occur for "Release" tags.
+2. a Commit has been tagged with a semver compliant version.
 3. GitHub linguist has determined that this project is a `Clojure` project
    (although in practice, the existince of a project.clj file is enough to do
    this)
@@ -78,3 +77,15 @@ require two important things:
     clojars).
 
 These are both one time configurations. Any new projects should be ready to go.
+
+## Feedback
+
+This represents what we consider to be a good set of best practices but we are
+looking for feedback. Some of the
+
+-   we decided to not provide an option to deploy only GitHub "release" tags. Do
+    teams need the additional semantic of a GitHub release?
+-   we decided to allow the checked in project.clj version to stay out of sync
+    with what is deployed. The important thing is that the tag and version
+    deployed to maven are always in sync. Does it make sense of offer an option
+    to sync these?
