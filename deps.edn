@@ -51,4 +51,5 @@
     "cljs" 
     "--without-sign" 
     "--prefix" 
-    ":none"]}}}
+    ":none"]}
+  :build {:jvm-opts ["-Xmx2G" "-XX:+UnlockExperimentalVMOptions" "-XX:+PrintCommandLineFlags" "-XX:+UseCGroupMemoryLimitForHeap"]}}}
