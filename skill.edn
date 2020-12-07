@@ -39,6 +39,12 @@
    "Maven repository for resolving artifacts referenced in project.clj",
    :typeName "MavenRepositoryProvider",
    :minRequired 0}],
+ :capabilities {:requires [{:namespace "atomist"
+                            :name "MavenRepository"
+                            :minRequired 0
+                            :displayName "MavenRepository Integration"
+                            :description "Select a MavenRepository Integration"
+                            :scopes ["configuration"]}]}
  :parameters
  [{:stringArray
    {:name "docker_cache",
