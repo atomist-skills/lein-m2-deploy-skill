@@ -121,16 +121,30 @@
                                                 :username username
                                                 :password password
                                                 :sign-releases false}]]
-             :repositories [(->> (-> request :atomist/resource-providers :resolve)
-                                 (map (fn [{:keys [url credential]}]
-                                        [name {:url url
-                                               :username (-> credential :owner :login)
-                                               :password (-> credential :secret)}]))
-                                 (into []))]}
+             :repositories (->> (-> request :atomist/resource-providers :resolve)
+                                (map (fn [{:keys [name url credential]}]
+                                       [name {:url url
+                                              :username (-> credential :owner :login)
+                                              :password (-> credential :secret)}]))
+                                (into []))}
            ;; if the root project does not specify a url then add one to the profile
             (if (not (-> request :atomist.leiningen/non-evaled-project-map :url))
               {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))})))
       (<! (handler request)))))
+
+(comment
+  ((add-deploy-profile #(go %))
+   {:project {:path "/Users/slim/skills/lein-m2-deploy-skill"}
+    :atomist.leiningen/non-evaled-project-map {:url "https://url"}
+    :atomist/resource-providers
+    {:releases [{:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
+                 :name "whatever"
+                 :credential {:owner {:login "clojure-build"}
+                              :secret "password"}}]
+     :resolve [{:url "https://sforzando.jfrog.io/sforzando/libs-release-local"
+                :name "whatever"
+                :credential {:owner {:login "clojure-build"}
+                             :secret "password"}}]}}))
 
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"

@@ -19,7 +19,7 @@
  :name "lein-m2-deploy-skill",
  :author "kipz",
  :iconUrl
- "https://raw.githubusercontent.com/cljs/logo/master/cljs.png",
+ "https://images.atomist.com/rug/atomist.png",
  :homepageUrl "https://github.com/atomist-skills/lein-m2-deploy-skill",
  :namespace "atomist",
  :resourceProviders
