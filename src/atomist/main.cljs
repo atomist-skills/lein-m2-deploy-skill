@@ -208,10 +208,10 @@
               (<! (handler
                    (assoc request
                           :atomist/summary (gstring/format
-                                            "`lein deploy` success on %s/%s:%s"
+                                            "`lein deploy` success %s/%s:%s"
                                             (-> request :ref :owner)
                                             (-> request :ref :repo)
-                                            (-> request :ref :sha))
+                                            (:tag request))
                           :checkrun/conclusion "success"
                           :checkrun/output
                           {:title "Leiningen Deploy Success"
