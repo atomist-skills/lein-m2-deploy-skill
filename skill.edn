@@ -58,6 +58,7 @@
     :displayName "Do not deploy from any repos that contain files from this list of paths"
     :description "Existence of these files means that this tag should be skipped"
     :placeHolder "Dockerfile"
+    :usage "excludes"
     :required false}}
   {:repoFilter
    {:description "The set of repositories to monitor for tags",
