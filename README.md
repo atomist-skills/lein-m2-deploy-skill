@@ -102,7 +102,7 @@ publish to those groups can create those artifacts.
 
 However, it is possible that if it was easier to consistently sign jars, we
 could ratchet up this trust model by helping contributors to maintain and
-consistently use their signing keys. You might even imagine a correspond
+consistently use their signing keys. You might even imagine a corresponding
 CheckRun skill that verifies signatures for a selected set of artifacts, or
 artifact groups.
 
