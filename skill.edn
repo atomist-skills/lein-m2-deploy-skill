@@ -64,6 +64,7 @@
    {:name "paths-exists"
     :description "Paths to index and that must be present"
     :visibility "hidden"
+    :defaultValue ["project.clj"]
     :usage "includes"
     :required false}}
   {:repoFilter
