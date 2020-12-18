@@ -60,6 +60,12 @@
     :placeHolder "Dockerfile"
     :usage "excludes"
     :required false}}
+  {:fileFilter
+   {:name "paths-exists"
+    :description "Paths to index and that must be present"
+    :visibility "hidden"
+    :usage "includes"
+    :required false}}
   {:repoFilter
    {:description "The set of repositories to monitor for tags",
     :displayName "Repository Scope",
