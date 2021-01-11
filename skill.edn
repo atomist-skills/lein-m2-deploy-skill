@@ -27,23 +27,21 @@
    :description "GitHub",
    :typeName "GitHubAppResourceProvider",
    :minRequired 1,
-   :maxAllowed 1}
-  {:name "releases",
-   :description
-   "Maven repository for deploying artifacts referenced in project.clj",
-   :typeName "MavenRepositoryProvider",
-   :minRequired 1,
-   :maxAllowed 1}
-  {:name "resolve",
-   :description
-   "Maven repository for resolving artifacts referenced in project.clj",
-   :typeName "MavenRepositoryProvider",
-   :minRequired 0}],
+   :maxAllowed 1}],
  :capabilities {:requires [{:namespace "atomist"
                             :name "MavenRepository"
+                            :minRequired 1
+                            :maxAllowed 1
+                            :usage "releases"
+                            :displayName "Deploy Repository"
+                            :description "Select a Maven Repository to deploy artifacts to"
+                            :scopes ["configuration"]}
+                           {:namespace "atomist"
+                            :name "MavenRepository"
                             :minRequired 0
-                            :displayName "MavenRepository Integration"
-                            :description "Select a MavenRepository Integration"
+                            :usage "resolve"
+                            :displayName "Artifact Resolution Repository"
+                            :description "One or more repositories required for artifact resolution"
                             :scopes ["configuration"]}]}
  :parameters
  [{:stringArray
