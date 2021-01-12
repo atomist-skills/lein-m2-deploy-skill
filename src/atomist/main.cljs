@@ -106,7 +106,11 @@
             url (:maven.repository/url release-repo)
             username (:maven.repository/username release-repo)
             repo-id (:maven.repository/repository-id release-repo)
-            password (:maven.repository/secret release-repo)]
+            password (:maven.repository/secret release-repo)
+            releases ["releases" {:url url
+                                  :username username
+                                  :password password
+                                  :sign-releases false}]]
         (log/infof "Found releases integration: %s" (gstring/format "%s - %s" repo-id url))
         (log/infof "Found resolve integration: %s"
                    (->> (:resolve repo-map)
@@ -123,17 +127,14 @@
          (pr-str
           {:lein-m2-deploy
            (merge
-            {:deploy-repositories [["releases" {:url url
-                                                :username username
-                                                :password password
-                                                :sign-releases false}]]}
-            (when-let [resolve (:resolve repo-map)]
-              {:repositories (->> resolve
-                                  (map (fn [{:maven.repository/keys [repository-id url username secret]}]
-                                         [repository-id {:url url
-                                                         :username username
-                                                         :password secret}]))
-                                  (into []))})
+            {:deploy-repositories [releases]
+             :repositories (->> (:resolve repo-map)
+                                (concat [releases])
+                                (map (fn [{:maven.repository/keys [repository-id url username secret]}]
+                                       [repository-id {:url url
+                                                       :username username
+                                                       :password secret}]))
+                                (into []))}
            ;; if the root project does not specify a url then add one to the profile
             (when-not (-> request :atomist.leiningen/non-evaled-project-map :url)
               {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))})))
