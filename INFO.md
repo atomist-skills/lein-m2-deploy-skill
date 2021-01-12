@@ -1,5 +1,5 @@
-Run `lein deploy` each time a Repository containing a Leiningen project.clj file
-is tagged or released.
+Run `lein deploy` each time a Git Repository containing a Leiningen project.clj
+file is tagged or released.
 
 This does not require any per repository configuration. It activates itself
 whenever the following conditions are detected:
