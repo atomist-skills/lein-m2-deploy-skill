@@ -140,10 +140,9 @@
                                                        :password secret}]))
                                 (into []))}
            ;; if the root project does not specify a url then add one to the profile
-           (when-not (-> request :atomist.leiningen/non-evaled-project-map :url)
-             {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))}))
-       (<! (handler (assoc request :atomist/deploy-repo-id repo-id)))))))
-
+            (when-not (-> request :atomist.leiningen/non-evaled-project-map :url)
+              {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))}))
+        (<! (handler (assoc request :atomist/deploy-repo-id repo-id)))))))
 
 (comment
   (println ((add-deploy-profile #(go %))
