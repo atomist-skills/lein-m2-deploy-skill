@@ -31,9 +31,8 @@ action.
     repository for deployments is over-ridden.
 
 If the deployment is successful, this skill also tracks the new maven artifact,
-and it's relationship to a the Commit, in the Atomist graph. Other skills can
-watch for this new artifact and choose to automatically update their own
-dependencies.
+and its relationship to a Commit, in the Atomist graph. Other skills can watch
+for this new artifact and choose to automatically update their own dependencies.
 
 This skill also allows users to restrict its action to a filter set of
 repositories in a GitHub organization; however, the skill is design to automate
