@@ -140,9 +140,10 @@
                                                        :password secret}]))
                                 (into []))}
            ;; if the root project does not specify a url then add one to the profile
-            (when-not (-> request :atomist.leiningen/non-evaled-project-map :url)
-              {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))}))
-        (<! (handler (assoc request :atomist/deploy-repo-id repo-id)))))))
+           (when-not (-> request :atomist.leiningen/non-evaled-project-map :url)
+             {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))}))
+       (<! (handler (assoc request :atomist/deploy-repo-id repo-id :atomist/deploy-repo-url url)))))))
+
 
 (comment
   (println ((add-deploy-profile #(go %))
@@ -220,21 +221,21 @@
                                               :maven.artifact/commit "$commit"
                                               :maven.artifact/name artifact-name
                                               :maven.artifact/group group
-                                              :maven.artifact/version (:tag request)}])))
-                (catch :default ex
-                  (log/error "Error transacting deployed artifact " ex)))
+                                              :maven.artifact/version (:tag request)}]))
 
-              (<! (handler
-                   (assoc request
-                          :atomist/summary (gstring/format
-                                            "`lein deploy` success %s/%s:%s"
-                                            (-> request :ref :owner)
-                                            (-> request :ref :repo)
-                                            (:tag request))
-                          :checkrun/conclusion "success"
-                          :checkrun/output
-                          {:title "Leiningen Deploy Success"
-                           :summary (apply str (take-last 300 stdout))}))))))
+                  (<! (handler
+                       (assoc request
+                         :atomist/summary (gstring/format
+                                           "Deployed _%s:%s_ to %s"
+                                           artifact-name
+                                           (:atomist.main/tag request)
+                                           (:atomist/deploy-repo-url request))
+                         :checkrun/conclusion "success"
+                         :checkrun/output
+                         {:title "Leiningen Deploy Success"
+                          :summary (apply str (take-last 300 stdout))}))))
+                (catch :default ex
+                  (log/error "Error transacting deployed artifact " ex))))))
         (catch :default ex
           (log/error ex)
           (<! (api/finish
