@@ -31,13 +31,13 @@
     (go
       (if-let [tag (let [{:git.ref/keys [_commit]} (-> request :subscription :result first first)]
                      (->> _commit
-                          (filter #(= :git.ref.type/tag (-> % :git.ref/type :db/ident)))
+                          (filter #(= :git.ref.type/tag (-> % :git.ref/type :db/ident keyword)))
                           last
                           :git.ref/name))]
         (<! (handler (assoc request :atomist.main/tag tag)))
         (do
           (log/infof "unable to extract tag from %s" (-> request :subscription :result first first))
-          (assoc request :atomist/status {:code 1 :reason (gstring/format "no tag ref subscription results")}))))))
+          (assoc request :atomist/status {:code 1 :reason (gstring/format "no tag ref in results")}))))))
 
 (defn create-ref-from-event
   [handler]
