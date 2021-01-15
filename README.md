@@ -123,10 +123,10 @@ lein-m2-deploy-skill@atomist.com, but is there any value in that? Atomist users
 could easily trick lein-m2-deploy-skill@atomist.com into signing pretty much any
 artifact (e.g. org.clojure/clojure version 10.4) by just presenting it with a
 fake project.clj file. Access to the `org.clojure` group on clojars is still the
-only real protection there. The only thing trusting `lein-m2-deploy` skill really
-does is ensure that bad actors with access to an `org.clojure` deploy token,
-can't upload a bad clojure jar without leaving behind a trace in git. Is there
-value in that?
+only real protection there. The only thing trusting `lein-m2-deploy` skill
+really does is ensure that bad actors with access to an `org.clojure` deploy
+token, can't upload a bad clojure jar without leaving behind a trace in git. Is
+there value in that?
 
 -   [link to one signing as a service company](https://about.signpath.io/documentation/signing-code#)
 -   [another company doing pki as a service](https://www.keyfactor.com/business-need/accelerate-devops-security/)
