@@ -1,6 +1,6 @@
 [:find
  (pull ?commit [:git.commit/sha
-                {:git.ref/_commit [:git.ref/name]
+                {:git.ref/_commit [:git.ref/name :git.ref/type]
                  :git.commit/repo [:git.repo/source-id
                                    :git.repo/name
                                    :git.provider/url
