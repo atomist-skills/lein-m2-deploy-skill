@@ -1,13 +1,12 @@
 [:find
  (pull ?commit [:git.commit/sha
-                {:git.commit/repo [:git.repo/source-id
+                {:git.ref/_commit [:git.ref/name]
+                 :git.commit/repo [:git.repo/source-id
                                    :git.repo/name
                                    :git.provider/url
                                    {:git.repo/org [:github.org/installation-token
                                                    :git.org/name
                                                    :git.provider/url]}]}])
- (pull ?ref [:git.ref/name
-             :git.ref/type])
 
  (pull ?maven-repo [:maven.repository/url
                     :maven.repository/secret
@@ -19,6 +18,7 @@
  (get-config-value "path-not-exists" [] ?path-not-exists)
  (tx-tag-with-content [] ["project.clj"] ?path-not-exists ?ref)
  [?ref :git.ref/commit ?commit]
+ [?ref :git.ref/type :git.ref.type/tag]
  [?commit :git.commit/repo ?repo]
  (repo-language ?repo "Clojure")
  (capability-configuration "atomist" "MavenRepository" ?usage ?maven-repo)]

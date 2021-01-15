@@ -29,8 +29,11 @@
   [handler]
   (fn [request]
     (go
-      (if-let [{:git.ref/keys [name type]} (-> request :subscription :result first second)]
-        (<! (handler (assoc request :atomist.main/tag name)))
+      (if-let [{:git.ref/keys [_commit]} (-> request :subscription :result first first)]
+        (<! (handler (assoc request :atomist.main/tag (->> _commit
+                                                           (filter #(= :git.ref.type/tag (-> % :git.ref/type :db/ident)))
+                                                           last
+                                                           :git.ref/name))))
         (<! (handler request))))))
 
 (defn create-ref-from-event
@@ -99,7 +102,7 @@
   (fn [request]
     (go
       (let [repo-map (reduce
-                      (fn [acc [_ _ repo usage]]
+                      (fn [acc [_ repo usage]]
                         (if (and repo usage)
                           (update acc (keyword usage) (fn [repos]
                                                         (conj (or repos []) repo)))
@@ -148,27 +151,6 @@
               {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))}))
         (<! (handler (assoc request :atomist/deploy-repo-id repo-id :atomist/deploy-repo-url url)))))))
 
-(comment
-  (println ((add-deploy-profile #(go %))
-            {:project {:path "./"}
-             :atomist.leiningen/non-evaled-project-map {:url "https://url"}
-             :subscription {:result [[{:git.commit/sha "somesha"}
-                                      {:git.ref/type "tag"}
-                                      #:maven.repository{:id "15934c75-2235-5ac0-af2d-e7f15bb9b743"
-                                                         :repository-id "releases"
-                                                         :secret "super"
-                                                         :url "https://clojars.org/m2"
-                                                         :username "bob"}
-                                      "releases"]
-                                     [{:git.commit/sha "somesha"}
-                                      {:git.ref/type "tag"}
-                                      #:maven.repository{:id "15934c75-2235-5ac0-af2d-e7f15bb9b743"
-                                                         :repository-id "resolve"
-                                                         :secret "super"
-                                                         :url "https://clojars.org/m2/resolve"
-                                                         :username "bob"}
-                                      "resolve"]]}})))
-
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
   [x]
@@ -198,7 +180,7 @@
                            :reason (gstring/format "`lein deploy` error on %s/%s:%s"
                                                    (-> request :ref :owner)
                                                    (-> request :ref :repo)
-                                                   (-> request :ref :sha))}
+                                                   (:atomist.main/tag request))}
                           :atomist.status/report :failed
                           :checkrun/conclusion "failure"
                           :checkrun/output
