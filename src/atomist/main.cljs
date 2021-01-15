@@ -14,16 +14,16 @@
 
 (ns atomist.main
   (:require [atomist.api :as api]
-            [cljs.pprint :refer [pprint]]
             [goog.string.format]
-            [cljs.core.async :as async :refer [<! >! chan timeout] :refer-macros [go]]
+            [cljs.core.async :as async :refer [<!] :refer-macros [go]]
             [atomist.container :as container]
             [cljs-node-io.core :as io]
             [goog.string :as gstring]
             [atomist.proc :as proc]
             [atomist.cljs-log :as log]
             [clojure.edn :as edn]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [cljs.reader]))
 
 (defn add-tag-to-request
   [handler]
@@ -53,13 +53,16 @@
          (:license (:atomist.leiningen/non-evaled-project-map request)))
         (<! (handler request))
         :else
-        (<! (handler (assoc request
-                            :atomist/summary (gstring/format "no project.clj in the root of %s/%s" (-> request :ref :owner) (-> request :ref :repo))
-                            :atomist.status/report :failed
-                            :checkrun/conclusion "failure"
-                            :checkrun/output
-                            {:title "project.clj missing description or license"
-                             :summary "atomist/lein-m2-deploy-skill requires that the project.clj define a `:description` and a `license`"})))))))
+        (assoc request
+               :atomist/status
+               {:code 1
+                :reason (gstring/format "project.clj in the root of %s/%s missing either :description or :license"
+                                        (-> request :ref :owner)
+                                        (-> request :ref :repo))}
+               :checkrun/conclusion "failure"
+               :checkrun/output
+               {:title "project.clj missing description or license"
+                :summary "atomist/lein-m2-deploy-skill requires that the project.clj define a `:description` and a `license`"})))))
 
 (defn warn-about-deploy-branches
   [handler]
@@ -82,13 +85,14 @@
                          (reduce #(apply assoc %1 %2) {}))]
           (<! (handler (assoc request :atomist.leiningen/non-evaled-project-map p-map))))
         (catch :default ex
-          (<! (handler assoc request
-                       :atomist/summary (gstring/format "invalid project.clj")
-                       :atomist.status/report :failed
-                       :checkrun/conclusion "failure"
-                       :checkrun/output
-                       {:title "invalid project.clj"
-                        :summary (str "atomist/lein-m2-deploy-skill failed to read project.clj:  " ex)})))))))
+          (assoc request
+                 :atomist/status
+                 {:code 1
+                  :reason "invalid project.clj"}
+                 :checkrun/conclusion "failure"
+                 :checkrun/output
+                 {:title "invalid project.clj"
+                  :summary (str "atomist/lein-m2-deploy-skill failed to read project.clj:  " ex)}))))))
 
 (defn add-deploy-profile
   [handler]
@@ -189,7 +193,12 @@
               (log/error "process exited with code " (. err -code))
               (<! (handler
                    (assoc request
-                          :atomist/summary (gstring/format "`lein deploy` error on %s/%s:%s" (-> request :ref :owner) (-> request :ref :repo) (-> request :ref :sha))
+                          :atomist/status 
+                          {:code (. err -code)
+                           :reason (gstring/format "`lein deploy` error on %s/%s:%s" 
+                                                   (-> request :ref :owner) 
+                                                   (-> request :ref :repo) 
+                                                   (-> request :ref :sha))}
                           :atomist.status/report :failed
                           :checkrun/conclusion "failure"
                           :checkrun/output
@@ -224,11 +233,14 @@
 
                   (<! (handler
                        (assoc request
-                              :atomist/summary (gstring/format
-                                                "Deployed _%s:%s_ to %s"
-                                                artifact-name
-                                                (:atomist.main/tag request)
-                                                (:atomist/deploy-repo-url request))
+                              :atomist/status
+                              {:code 0
+                               :status
+                               (gstring/format
+                                "Deployed _%s:%s_ to %s"
+                                artifact-name
+                                (:atomist.main/tag request)
+                                (:atomist/deploy-repo-url request))}
                               :checkrun/conclusion "success"
                               :checkrun/output
                               {:title "Leiningen Deploy Success"
@@ -237,25 +249,27 @@
                   (log/error "Error transacting deployed artifact " ex))))))
         (catch :default ex
           (log/error ex)
-          (<! (api/finish
-               (assoc request
-                      :atomist/summary (gstring/format
-                                        "`lein deploy` error on %s/%s:%s"
-                                        (-> request :ref :owner)
-                                        (-> request :ref :repo)
-                                        (-> request :ref :sha))
-                      :checkrun/conclusion "failure"
-                      :checkrun/output
-                      {:title "Lein Deploy error"
-                       :summary "There was an error running lein deploy"})
-               :failure
-               "failed to run lein deploy")))))))
+          (assoc request
+                 :atomist/status {:code 1
+                                  :reason
+                                  (gstring/format
+                                   "`lein deploy` error on %s/%s:%s"
+                                   (-> request :ref :owner)
+                                   (-> request :ref :repo)
+                                   (-> request :ref :sha))}
+                 :checkrun/conclusion "failure"
+                 :checkrun/output
+                 {:title "Lein Deploy error"
+                  :summary "There was an error running lein deploy"}))))))
 
 (defn ^:export handler
   [& args]
   ((-> (api/finished)
        (run-leiningen (fn [request]
-                        (gstring/format "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy %s" (:atomist.main/tag request) (:atomist/deploy-repo-id request))))
+                        (gstring/format 
+                          "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy %s" 
+                          (:atomist.main/tag request) 
+                          (:atomist/deploy-repo-id request))))
        (add-deploy-profile)
        (check-description-and-license)
        (warn-about-deploy-branches)
@@ -265,6 +279,6 @@
        (add-tag-to-request)
        (create-ref-from-event)
        (api/log-event)
-       (api/status :send-status (fn [{:atomist/keys [summary]}] summary))
+       (api/status)
        (container/mw-make-container-request))
    {}))
