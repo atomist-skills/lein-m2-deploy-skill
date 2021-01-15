@@ -193,11 +193,11 @@
               (log/error "process exited with code " (. err -code))
               (<! (handler
                    (assoc request
-                          :atomist/status 
+                          :atomist/status
                           {:code (. err -code)
-                           :reason (gstring/format "`lein deploy` error on %s/%s:%s" 
-                                                   (-> request :ref :owner) 
-                                                   (-> request :ref :repo) 
+                           :reason (gstring/format "`lein deploy` error on %s/%s:%s"
+                                                   (-> request :ref :owner)
+                                                   (-> request :ref :repo)
                                                    (-> request :ref :sha))}
                           :atomist.status/report :failed
                           :checkrun/conclusion "failure"
@@ -266,10 +266,10 @@
   [& args]
   ((-> (api/finished)
        (run-leiningen (fn [request]
-                        (gstring/format 
-                          "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy %s" 
-                          (:atomist.main/tag request) 
-                          (:atomist/deploy-repo-id request))))
+                        (gstring/format
+                         "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy %s"
+                         (:atomist.main/tag request)
+                         (:atomist/deploy-repo-id request))))
        (add-deploy-profile)
        (check-description-and-license)
        (warn-about-deploy-branches)
