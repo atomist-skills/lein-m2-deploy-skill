@@ -70,8 +70,8 @@
     :required true}}],
  :artifacts
  {:docker
-  [{:name "lein-m2-deploy",
-    :image "gcr.io/atomist-container-skills/lein-m2-deploy",
+  [{:name "lein-m2-deploy-skill",
+    :image "gcr.io/atomist-container-skills/lein-m2-deploy-skill",
     :resources
     {:request {:cpu 0.1, :memory 1000},
      :limit {:cpu 1, :memory 1000}}}]}}
