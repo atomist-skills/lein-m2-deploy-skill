@@ -62,7 +62,7 @@
                :checkrun/conclusion "failure"
                :checkrun/output
                {:title "project.clj missing description or license"
-                :summary "atomist/lein-m2-deploy-skill requires that the project.clj define a `:description` and a `license`"})))))
+                :summary "atomist/lein-m2-deploy skill requires that the project.clj define a `:description` and a `license`"})))))
 
 (defn warn-about-deploy-branches
   [handler]
@@ -92,7 +92,7 @@
                  :checkrun/conclusion "failure"
                  :checkrun/output
                  {:title "invalid project.clj"
-                  :summary (str "atomist/lein-m2-deploy-skill failed to read project.clj:  " ex)}))))))
+                  :summary (str "atomist/lein-m2-deploy skill failed to read project.clj:  " ex)}))))))
 
 (defn add-deploy-profile
   [handler]

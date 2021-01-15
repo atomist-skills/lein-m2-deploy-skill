@@ -29,14 +29,14 @@ projects that depend on this one.
 
 ## Why Tags?
 
-The `lein-m2-deploy-skill` can work in combination with another skill that
+The `lein-m2-deploy` skill can work in combination with another skill that
 manages a policy for tagging. For example, we have a skill that watches for a
 set of GitHub Check runs passing (CI passing, cljfmt satisfied, clj-kondo with
 zero violations, vulnerability scanning, etc.). If these checks pass then we
 increment the version and Tag. Again, we try to use the same policy for Tagging
 on all of our Leiningen projects.
 
-The `lein-m2-deploy-skill` can of course be used with a manual tagging process.
+The `lein-m2-deploy` skill can of course be used with a manual tagging process.
 However, two policies defining
 
 -   "I tag Commits on my Clojure projects when ..."
