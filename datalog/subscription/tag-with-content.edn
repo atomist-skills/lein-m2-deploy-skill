@@ -13,7 +13,7 @@
                     :maven.repository/username
                     :maven.repository/repository-id])
  ?usage
- ?pgp-secret-key
+ ;?pgp-secret-key
  :in $ $before-db %
  :where
  (get-config-value "path-not-exists" [] ?path-not-exists)
