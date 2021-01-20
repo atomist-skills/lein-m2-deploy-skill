@@ -17,7 +17,7 @@
  :in $ $before-db %
  :where
  (get-config-value "path-not-exists" [] ?path-not-exists)
- (get-config-value "pgpKey" [] ?pgp-secret-key)
+ ;(get-config-value "pgpKey" [] ?pgp-secret-key)
  (tx-tag-with-content [] ["project.clj"] ?path-not-exists ?ref)
  [?ref :git.ref/commit ?commit]
  [?ref :git.ref/type :git.ref.type/tag]
