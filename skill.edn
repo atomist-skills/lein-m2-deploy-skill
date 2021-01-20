@@ -66,6 +66,7 @@
   {:string
    {:name "pgpKey"
     :displayName "PGP private key"
+    :description "PGP private key"
     :visibility "hidden"
     :defaultValue "#{ ''maven-deploy-signer-private-key''|keys }"
     :required false}}
