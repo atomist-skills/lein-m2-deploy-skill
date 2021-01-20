@@ -121,6 +121,7 @@
                                :username username
                                :password password
                                :sign-releases false}]]
+        (log/debugf "Found pgp secret key? %s" (-> request :subscription :result first count (= 4)))
         (log/infof "Found releases integration: %s" (gstring/format "%s - %s" repo-id url))
         (log/infof "Found resolve integration: %s"
                    (->> (:resolve repo-map)

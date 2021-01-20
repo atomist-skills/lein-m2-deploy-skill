@@ -63,6 +63,12 @@
     :visibility "hidden"
     :defaultValue ["project.clj"]
     :required false}}
+  {:string
+   {:name "pgpKey"
+    :displayName "PGP private key"
+    :visibility "hidden"
+    :defaultValue "#{ ''maven-deploy-signer-private-key''|keys }"
+    :required false}}
   {:repoFilter
    {:description "The set of repositories to monitor for tags",
     :displayName "Repository Scope",
