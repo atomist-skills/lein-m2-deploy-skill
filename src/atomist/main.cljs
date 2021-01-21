@@ -121,7 +121,7 @@
                                :username username
                                :password password
                                :sign-releases false}]]
-        (log/debugf "Found pgp secret key? %s" (-> request :subscription :result first count (= 4)))
+        (log/debugf "Found pgp secret key: %s" (:pgpKey request))
         (log/infof "Found releases integration: %s" (gstring/format "%s - %s" repo-id url))
         (log/infof "Found resolve integration: %s"
                    (->> (:resolve repo-map)
@@ -263,6 +263,7 @@
        (api/with-github-check-run :name "lein-m2-deploy")
        (add-tag-to-request)
        (create-ref-from-event)
+       (api/add-skill-config)
        (api/log-event)
        (api/status)
        (container/mw-make-container-request))
