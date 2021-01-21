@@ -121,7 +121,7 @@
                                :username username
                                :password password
                                :sign-releases false}]]
-        (log/debugf "Found pgp secret key: %s" (:pgpKey request))
+        (log/debugf "Found pgp secret key: %s" (.. js/process -env -PGP_KEY))
         (log/infof "Found releases integration: %s" (gstring/format "%s - %s" repo-id url))
         (log/infof "Found resolve integration: %s"
                    (->> (:resolve repo-map)
