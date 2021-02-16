@@ -197,14 +197,15 @@
                                    (take-last 150 stderr)))}))))
             (do
               (try
-                (let [[org commit repo] (-> request :subscription :result first)
+                (let [[commit repo] (-> request :subscription :result first)
+                      org (:git.repo/org repo)
                       group-name (str (second (edn/read-string (io/slurp (io/file f "project.clj")))))
                       [group artifact-name] (str/split group-name #"/")
                      ;; for clojure where sometimes group is same as artifact
                       artifact-name (or artifact-name group)]
                   (<! (api/transact request [{:schema/entity-type :git/repo
                                               :schema/entity "$repo"
-                                              :git.provider/url (:git.provider/url org)
+                                              :git.provider/url (:git.provider/url repo)
                                               :git.repo/source-id (:git.repo/source-id repo)}
                                              {:schema/entity-type :git/commit
                                               :schema/entity "$commit"
