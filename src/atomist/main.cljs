@@ -15,7 +15,7 @@
 (ns atomist.main
   (:require [atomist.api :as api]
             [goog.string.format]
-            [cljs.core.async :as async :refer [<!] :refer-macros [go]]
+            [atomist.async :refer-macros [<? go-safe]]
             [atomist.container :as container]
             [cljs-node-io.core :as io]
             [goog.string :as gstring]
@@ -28,13 +28,13 @@
 (defn add-tag-to-request
   [handler]
   (fn [request]
-    (go
+    (go-safe
       (if-let [tag (let [{:git.ref/keys [_commit]} (-> request :subscription :result first first)]
                      (->> _commit
                           (filter #(= :git.ref.type/tag (-> % :git.ref/type :db/ident keyword)))
                           last
                           :git.ref/name))]
-        (<! (handler (assoc request :atomist.main/tag tag)))
+        (<? (handler (assoc request :atomist.main/tag tag)))
         (do
           (log/infof "unable to extract tag from %s" (-> request :subscription :result first first))
           (assoc request :atomist/status {:code 1 :reason (gstring/format "no tag ref in results")}))))))
@@ -42,9 +42,9 @@
 (defn create-ref-from-event
   [handler]
   (fn [request]
-    (go
+    (go-safe
       (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
-        (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
+        (<? (handler (assoc request :ref {:repo (:git.repo/name repo)
                                           :owner (-> repo :git.repo/org :git.org/name)
                                           :sha sha}
                             :token (-> repo :git.repo/org :github.org/installation-token))))))))
@@ -52,12 +52,12 @@
 (defn check-description-and-license
   [handler]
   (fn [request]
-    (go
+    (go-safe
       (cond
         (and
          (:description (:atomist.leiningen/non-evaled-project-map request))
          (:license (:atomist.leiningen/non-evaled-project-map request)))
-        (<! (handler request))
+        (<? (handler request))
         :else
         (assoc request
                :atomist/status
@@ -73,15 +73,15 @@
 (defn warn-about-deploy-branches
   [handler]
   (fn [request]
-    (go
-      (if (-> request :atomist.leiningen/non-evaled-project-map :deploy-branches)
+    (go-safe
+      (when (-> request :atomist.leiningen/non-evaled-project-map :deploy-branches)
         (log/warn "WARNING:  this project contains a :deploy-branches key.  We recommend standardizing branch filters outside of Leiningen."))
-      (<! (handler request)))))
+      (<? (handler request)))))
 
 (defn check-leiningen-project
   [handler]
   (fn [request]
-    (go
+    (go-safe
       (try
         (let [f (io/file (-> request :project :path) "project.clj")
               p (and (.exists f) (-> f (io/slurp) (cljs.reader/read-string)))
@@ -89,7 +89,7 @@
                          (drop 3)
                          (partition 2)
                          (reduce #(apply assoc %1 %2) {}))]
-          (<! (handler (assoc request :atomist.leiningen/non-evaled-project-map p-map))))
+          (<? (handler (assoc request :atomist.leiningen/non-evaled-project-map p-map))))
         (catch :default ex
           (assoc request
                  :atomist/status
@@ -103,7 +103,7 @@
 (defn add-deploy-profile
   [handler]
   (fn [request]
-    (go
+    (go-safe
       (let [repo-map (reduce
                       (fn [acc [_ repo usage]]
                         (if (and repo usage)
@@ -153,7 +153,7 @@
            ;; if the root project does not specify a url then add one to the profile
             (when-not (-> request :atomist.leiningen/non-evaled-project-map :url)
               {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))}))
-        (<! (handler (assoc request :atomist/deploy-repo-id repo-id :atomist/deploy-repo-url url)))))))
+        (<? (handler (assoc request :atomist/deploy-repo-id repo-id :atomist/deploy-repo-url url)))))))
 
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
@@ -163,7 +163,7 @@
 (defn run-leiningen
   [handler lein-args-fn]
   (fn [request]
-    (go
+    (go-safe
       (try
         (api/trace "run-leiningen-if-present")
         (let [f (io/file (-> request :project :path))
@@ -173,11 +173,11 @@
               exec-opts {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
               sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
                                            exec-opts)
-              [err stdout stderr] (<! sub-process-port)]
+              [err stdout stderr] (<? sub-process-port)]
           (if err
             (do
               (log/error "process exited with code " (. err -code))
-              (<! (handler
+              (<? (handler
                    (assoc request
                           :atomist/status
                           {:code (. err -code)
@@ -195,44 +195,43 @@
                             (apply str
                                    "\nstderr: \n"
                                    (take-last 150 stderr)))}))))
-            (do
-              (try
-                (let [[commit repo] (-> request :subscription :result first)
-                      org (:git.repo/org repo)
-                      group-name (str (second (edn/read-string (io/slurp (io/file f "project.clj")))))
-                      [group artifact-name] (str/split group-name #"/")
+            (try
+              (let [[commit repo] (-> request :subscription :result first)
+                    org (:git.repo/org repo)
+                    group-name (str (second (edn/read-string (io/slurp (io/file f "project.clj")))))
+                    [group artifact-name] (str/split group-name #"/")
                      ;; for clojure where sometimes group is same as artifact
-                      artifact-name (or artifact-name group)]
-                  (<! (api/transact request [{:schema/entity-type :git/repo
-                                              :schema/entity "$repo"
-                                              :git.provider/url (:git.provider/url repo)
-                                              :git.repo/source-id (:git.repo/source-id repo)}
-                                             {:schema/entity-type :git/commit
-                                              :schema/entity "$commit"
-                                              :git.provider/url (:git.provider/url org)
-                                              :git.commit/sha (:git.commit/sha commit)
-                                              :git.commit/repo "$repo"}
-                                             {:schema/entity-type :maven/artifact
-                                              :maven.artifact/commit "$commit"
-                                              :maven.artifact/name artifact-name
-                                              :maven.artifact/group group
-                                              :maven.artifact/version (:tag request)}]))
-                  (<! (handler
-                       (assoc request
-                              :atomist/status
-                              {:code 0
-                               :reason
-                               (gstring/format
-                                "Deployed _%s:%s_ to %s"
-                                artifact-name
-                                (:atomist.main/tag request)
-                                (:atomist/deploy-repo-url request))}
-                              :checkrun/conclusion "success"
-                              :checkrun/output
-                              {:title "Leiningen Deploy Success"
-                               :summary (apply str (take-last 300 stdout))}))))
-                (catch :default ex
-                  (log/error "Error transacting deployed artifact " ex))))))
+                    artifact-name (or artifact-name group)]
+                (<? (api/transact request [{:schema/entity-type :git/repo
+                                            :schema/entity "$repo"
+                                            :git.provider/url (:git.provider/url repo)
+                                            :git.repo/source-id (:git.repo/source-id repo)}
+                                           {:schema/entity-type :git/commit
+                                            :schema/entity "$commit"
+                                            :git.provider/url (:git.provider/url org)
+                                            :git.commit/sha (:git.commit/sha commit)
+                                            :git.commit/repo "$repo"}
+                                           {:schema/entity-type :maven/artifact
+                                            :maven.artifact/commit "$commit"
+                                            :maven.artifact/name artifact-name
+                                            :maven.artifact/group group
+                                            :maven.artifact/version (:tag request)}]))
+                (<? (handler
+                     (assoc request
+                            :atomist/status
+                            {:code 0
+                             :reason
+                             (gstring/format
+                              "Deployed _%s:%s_ to %s"
+                              artifact-name
+                              (:atomist.main/tag request)
+                              (:atomist/deploy-repo-url request))}
+                            :checkrun/conclusion "success"
+                            :checkrun/output
+                            {:title "Leiningen Deploy Success"
+                             :summary (apply str (take-last 300 stdout))}))))
+              (catch :default ex
+                (log/error "Error transacting deployed artifact " ex)))))
         (catch :default ex
           (log/error ex)
           (assoc request
