@@ -1,4 +1,6 @@
 .cpcache
+.lsp/
+.calva/
 .shadow-cljs
 index.js
 node_modules

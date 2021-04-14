@@ -117,11 +117,12 @@
             username (:maven.repository/username release-repo)
             repo-id (:maven.repository/repository-id release-repo)
             password (:maven.repository/secret release-repo)
+            gpg-key (.. js/process -env -PGP_KEY)
             releases [repo-id {:url url
                                :username username
                                :password password
                                :sign-releases false}]]
-        (log/debugf "Found pgp secret key: %s" (.. js/process -env -PGP_KEY))
+        (log/debugf "Found pgp secret key: %s" (boolean gpg-key))
         (log/infof "Found releases integration: %s" (gstring/format "%s - %s" repo-id url))
         (log/infof "Found resolve integration: %s"
                    (->> (:resolve repo-map)

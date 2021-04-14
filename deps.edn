@@ -15,7 +15,7 @@
 {:paths ["src"],
  :deps
  {org.clojure/clojurescript {:mvn/version "1.10.520"},
-  com.atomist/api-cljs {:mvn/version "0.5.37"}
+  com.atomist/api-cljs {:mvn/version "0.5.39"}
   rewrite-cljs/rewrite-cljs {:mvn/version "0.4.4"}},
  :aliases
  {:dev
@@ -49,8 +49,8 @@
     "src"
     "--namespace"
     "atomist.skill-meta"
-    "--formats" 
-    "cljs" 
-    "--without-sign" 
-    "--prefix" 
+    "--formats"
+    "cljs"
+    "--without-sign"
+    "--prefix"
     ":none"]}}}
