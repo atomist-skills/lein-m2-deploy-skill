@@ -56,13 +56,15 @@
     :displayName "GPG private key (pem format)"
     :description "GPG private key to use for signing deployed jars"
     :minRequired 0
-    :maxAllowed 1}}
+    :maxAllowed 1
+    :required false}}
   {:secret
    {:name "gpg-private-key-passphrase"
     :displayName "Optional: GPG private key passphrase"
     :description "Passphrase for the GPG private key to use for signing deployed jars"
     :minRequired 0
-    :maxAllowed 1}}
+    :maxAllowed 1
+    :required false}}
   {:fileFilter
    {:name "path-not-exists"
     :displayName "Do not deploy from any repos that contain files from this list of paths"
