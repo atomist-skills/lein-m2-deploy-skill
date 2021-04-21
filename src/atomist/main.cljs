@@ -163,14 +163,14 @@
            gpg-key-passphrase (some-> request :subscription :result first (nth 4) (not-empty))]
        (if gpg-key
          (do
-           (log/infof "Found GPG private key. Importing for signing...")
+           (log/infof "Found GPG private key. Importing for signing... %s" gpg-key)
            (let [gpg-key-file-name "/tmp/gpg.key"
                  pwd-file-name "/tmp/pwd.txt"
                  pwd-file (io/file pwd-file-name)
                  gpg-file (io/file gpg-key-file-name)]
              (io/spit gpg-file gpg-key)
              (when gpg-key-passphrase
-               (log/infof "Importing with passphrase")
+               (log/infof "Importing with passphrase %s" gpg-key-passphrase)
                (io/spit pwd-file gpg-key-passphrase))
              (try
                (<? (proc/aexec "gpg-agent --daemon" {:maxBuffer (* 1024 1024 5)}))
