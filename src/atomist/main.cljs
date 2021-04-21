@@ -117,11 +117,12 @@
             username (:maven.repository/username release-repo)
             repo-id (:maven.repository/repository-id release-repo)
             password (:maven.repository/secret release-repo)
+            sign? (boolean (:atomist/sign-releases? request))
             releases [repo-id {:url url
                                :username username
                                :password password
-                               :sign-releases (boolean (:atomist/sign-releases? request))}]]
-
+                               :sign-releases sign?}]]
+        (log/infof "Signing: " sign?)
         (log/infof "Found releases integration: %s" (gstring/format "%s - %s" repo-id url))
         (log/infof "Found resolve integration: %s"
                    (->> (:resolve repo-map)
@@ -314,8 +315,8 @@
                          "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy %s"
                          (:atomist.main/tag request)
                          (:atomist/deploy-repo-id request))))
-       (prepare-keys)
        (add-deploy-profile)
+       (prepare-keys)
        (check-description-and-license)
        (warn-about-deploy-branches)
        (check-leiningen-project)
