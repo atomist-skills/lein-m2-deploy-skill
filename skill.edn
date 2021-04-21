@@ -51,6 +51,18 @@
     :visibility "hidden"
     :description "Cache and restore file system content between executions of this skill",
     :required false}}
+  {:secret
+   {:name "gpg-private-key"
+    :displayName "GPG private key (pem format)"
+    :description "GPG private key to use for signing deployed jars"
+    :minRequired 0
+    :maxAllowed 1}}
+  {:secret
+   {:name "gpg-private-key-passphrase"
+    :displayName "Optional: GPG private key passphrase"
+    :description "Passphrase for the GPG private key to use for signing deployed jars"
+    :minRequired 0
+    :maxAllowed 1}}
   {:fileFilter
    {:name "path-not-exists"
     :displayName "Do not deploy from any repos that contain files from this list of paths"

@@ -117,12 +117,11 @@
             username (:maven.repository/username release-repo)
             repo-id (:maven.repository/repository-id release-repo)
             password (:maven.repository/secret release-repo)
-            gpg-key (.. js/process -env -PGP_KEY)
             releases [repo-id {:url url
                                :username username
                                :password password
-                               :sign-releases false}]]
-        (log/debugf "Found pgp secret key: %s" (boolean gpg-key))
+                               :sign-releases (boolean (:atomist/sign-releases? request))}]]
+
         (log/infof "Found releases integration: %s" (gstring/format "%s - %s" repo-id url))
         (log/infof "Found resolve integration: %s"
                    (->> (:resolve repo-map)
@@ -155,6 +154,68 @@
             (when-not (-> request :atomist.leiningen/non-evaled-project-map :url)
               {:url (gstring/format "https://github.com/%s/%s" (-> request :ref :owner) (-> request :ref :repo))}))}))
         (<? (handler (assoc request :atomist/deploy-repo-id repo-id :atomist/deploy-repo-url url)))))))
+
+(defn prepare-keys
+  [handler]
+  (fn [request]
+    (go-safe
+     (let [gpg-key (some-> request :subscription :result first (nth 3) (not-empty))
+           gpg-key-passphrase (some-> request :subscription :result first (nth 4) (not-empty))]
+       (if gpg-key
+         (do
+           (log/infof "Found GPG private key. Importing for signing...")
+           (let [gpg-key-file-name "/tmp/gpg.key"
+                 pwd-file-name "/tmp/pwd.txt"
+                 pwd-file (io/file pwd-file-name)
+                 gpg-file (io/file gpg-key-file-name)]
+             (io/spit gpg-file gpg-key)
+             (when gpg-key-passphrase
+               (io/spit pwd-file gpg-key-passphrase))
+             (try
+               (<? (proc/aexec "gpg-agent --daemon" {:maxBuffer (* 1024 1024 5)}))
+               (let [sub-process-port (proc/aexec (if gpg-key-passphrase
+                                                    (gstring/format "gpg --pinentry-mode loopback --passphrase-file=%s --import %s" pwd-file-name gpg-key-file-name)
+                                                    (gstring/format "gpg --import %s" gpg-key-file-name)) {:maxBuffer (* 1024 1024 5)})
+                     [err stdout stderr] (<? sub-process-port)]
+                 (if err
+                   (do
+                     (log/errorf "Error import gpg key %s" stderr)
+                     (assoc request
+                            :atomist/status {:code 1
+                                             :reason
+                                             (gstring/format
+                                              "`gpg key import` error on %s/%s:%s"
+                                              (-> request :ref :owner)
+                                              (-> request :ref :repo)
+                                              (-> request :ref :sha))}
+                            :checkrun/conclusion "failure"
+                            :checkrun/output
+                            {:title "Lein Deploy error"
+                             :summary "There was an error configuring gpg"}))
+                   (<? (handler (assoc request :atomist/sign-releases? true)))))
+               (catch :default ex
+                 (log/error ex)
+                 (assoc request
+                        :atomist/status {:code 1
+                                         :reason
+                                         (gstring/format
+                                          "`gpg key import` error on %s/%s:%s"
+                                          (-> request :ref :owner)
+                                          (-> request :ref :repo)
+                                          (-> request :ref :sha))}
+                        :checkrun/conclusion "failure"
+                        :checkrun/output
+                        {:title "Lein Deploy error"
+                         :summary "There was an error configuring gpg"}))
+               (finally
+                ;; should throw exception and break the whole execution if this fails
+                 (io/delete-file gpg-file)
+                 (when gpg-key-passphrase
+                   (io/delete-file pwd-file)))))
+           )
+         (do
+           (log/infof "No GPG keys found, not signing")
+           (<? (handler request))))))))
 
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
@@ -256,6 +317,7 @@
                          "change version set '\"%s\"' && lein with-profile lein-m2-deploy deploy %s"
                          (:atomist.main/tag request)
                          (:atomist/deploy-repo-id request))))
+       (prepare-keys)
        (add-deploy-profile)
        (check-description-and-license)
        (warn-about-deploy-branches)
@@ -265,7 +327,7 @@
        (add-tag-to-request)
        (create-ref-from-event)
        (api/add-skill-config)
-       (api/log-event)
+       ;(api/log-event)
        (api/status)
        (container/mw-make-container-request))
    {}))
