@@ -57,6 +57,7 @@
     :description "GPG private key to use for signing deployed jars"
     :minRequired 0
     :maxAllowed 1
+    :lineStyle "multiple"
     :required false}}
   {:secret
    {:name "gpg-private-key-passphrase"
