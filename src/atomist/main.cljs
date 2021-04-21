@@ -170,6 +170,7 @@
                  gpg-file (io/file gpg-key-file-name)]
              (io/spit gpg-file gpg-key)
              (when gpg-key-passphrase
+               (log/infof "Importing with passphrase")
                (io/spit pwd-file gpg-key-passphrase))
              (try
                (<? (proc/aexec "gpg-agent --daemon" {:maxBuffer (* 1024 1024 5)}))
@@ -180,18 +181,18 @@
                  (if err
                    (do
                      (log/errorf "Error import gpg key %s" stderr)
-                     (assoc request
-                            :atomist/status {:code 1
-                                             :reason
-                                             (gstring/format
-                                              "`gpg key import` error on %s/%s:%s"
-                                              (-> request :ref :owner)
-                                              (-> request :ref :repo)
-                                              (-> request :ref :sha))}
-                            :checkrun/conclusion "failure"
-                            :checkrun/output
-                            {:title "Lein Deploy error"
-                             :summary "There was an error configuring gpg"}))
+                     (<? (handler (assoc request
+                                         :atomist/status {:code 1
+                                                          :reason
+                                                          (gstring/format
+                                                           "`gpg key import` error on %s/%s:%s"
+                                                           (-> request :ref :owner)
+                                                           (-> request :ref :repo)
+                                                           (-> request :ref :sha))}
+                                         :checkrun/conclusion "failure"
+                                         :checkrun/output
+                                         {:title "Lein Deploy error"
+                                          :summary "There was an error configuring gpg"}))))
                    (<? (handler (assoc request :atomist/sign-releases? true)))))
                (catch :default ex
                  (log/error ex)
@@ -211,8 +212,7 @@
                 ;; should throw exception and break the whole execution if this fails
                  (io/delete-file gpg-file)
                  (when gpg-key-passphrase
-                   (io/delete-file pwd-file)))))
-           )
+                   (io/delete-file pwd-file))))))
          (do
            (log/infof "No GPG keys found, not signing")
            (<? (handler request))))))))
@@ -247,7 +247,6 @@
                                                    (-> request :ref :owner)
                                                    (-> request :ref :repo)
                                                    (:atomist.main/tag request))}
-                          :atomist.status/report :failed
                           :checkrun/conclusion "failure"
                           :checkrun/output
                           {:title "Leiningen Deploy Failure"
