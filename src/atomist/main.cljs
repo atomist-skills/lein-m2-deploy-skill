@@ -159,18 +159,18 @@
   [handler]
   (fn [request]
     (go-safe
-     (let [gpg-key (some-> request :subscription :result first (nth 3) (not-empty))
-           gpg-key-passphrase (some-> request :subscription :result first (nth 4) (not-empty))]
+     (let [gpg-key (:gpg-private-key request)
+           gpg-key-passphrase (:gpg-private-key-passphrase request)]
        (if gpg-key
          (do
-           (log/infof "Found GPG private key. Importing for signing... %s" gpg-key)
+           (log/infof "Found GPG private key. Importing for signing...")
            (let [gpg-key-file-name "/tmp/gpg.key"
                  pwd-file-name "/tmp/pwd.txt"
                  pwd-file (io/file pwd-file-name)
                  gpg-file (io/file gpg-key-file-name)]
              (io/spit gpg-file gpg-key)
              (when gpg-key-passphrase
-               (log/infof "Importing with passphrase %s" gpg-key-passphrase)
+               (log/infof "Importing with passphrase")
                (io/spit pwd-file gpg-key-passphrase))
              (try
                (<? (proc/aexec "gpg-agent --daemon" {:maxBuffer (* 1024 1024 5)}))
@@ -181,18 +181,18 @@
                  (if err
                    (do
                      (log/errorf "Error import gpg key %s" stderr)
-                     (<? (handler (assoc request
-                                         :atomist/status {:code 1
-                                                          :reason
-                                                          (gstring/format
-                                                           "`gpg key import` error on %s/%s:%s"
-                                                           (-> request :ref :owner)
-                                                           (-> request :ref :repo)
-                                                           (-> request :ref :sha))}
-                                         :checkrun/conclusion "failure"
-                                         :checkrun/output
-                                         {:title "Lein Deploy error"
-                                          :summary "There was an error configuring gpg"}))))
+                     (assoc request
+                            :atomist/status {:code 1
+                                             :reason
+                                             (gstring/format
+                                              "`gpg key import` error on %s/%s:%s"
+                                              (-> request :ref :owner)
+                                              (-> request :ref :repo)
+                                              (-> request :ref :sha))}
+                            :checkrun/conclusion "failure"
+                            :checkrun/output
+                            {:title "Lein Deploy error"
+                             :summary "There was an error configuring gpg"}))
                    (<? (handler (assoc request :atomist/sign-releases? true)))))
                (catch :default ex
                  (log/error ex)

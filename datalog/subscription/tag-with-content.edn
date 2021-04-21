@@ -13,14 +13,10 @@
                     :maven.repository/username
                     :maven.repository/repository-id])
  ?usage
- ?gpg-private-key
- ?gpg-private-key-passphrase
  :in $ $before-db %
  :where
  (get-config-value "path-not-exists" [] ?path-not-exists)
  (tx-tag-with-content [] ["project.clj"] ?path-not-exists ?ref)
- (get-config-value "gpg-private-key" [] ?gpg-private-key)
- (get-config-value "gpg-private-key-passphrase" [] ?gpg-private-key-passphrase)
  [?ref :git.ref/commit ?commit]
  [?ref :git.ref/type :git.ref.type/tag]
  [?commit :git.commit/repo ?repo]
