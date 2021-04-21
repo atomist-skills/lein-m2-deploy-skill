@@ -163,14 +163,14 @@
            gpg-key-passphrase (:gpg-private-key-passphrase request)]
        (if gpg-key
          (do
-           (log/infof "Found GPG private key. Importing for signing... %s" gpg-key)
+           (log/infof "Found GPG private key. Importing for signing...")
            (let [gpg-key-file-name "/tmp/gpg.key"
                  pwd-file-name "/tmp/pwd.txt"
                  pwd-file (io/file pwd-file-name)
                  gpg-file (io/file gpg-key-file-name)]
              (io/spit gpg-file gpg-key)
              (when gpg-key-passphrase
-               (log/infof "Importing with passphrase %s" gpg-key-passphrase)
+               (log/infof "Importing with passphrase")
                (io/spit pwd-file gpg-key-passphrase))
              (try
                (<? (proc/aexec "gpg-agent --daemon" {:maxBuffer (* 1024 1024 5)}))
@@ -194,7 +194,9 @@
                             :checkrun/output
                             {:title "Lein Deploy error"
                              :summary "There was an error configuring gpg"}))
-                   (<? (handler (assoc request :atomist/sign-releases? true)))))
+                   (do
+                     (log/info "gpg keys imported successfully")
+                     (<? (handler (assoc request :atomist/sign-releases? true))))))
                (catch :default ex
                  (log/error ex)
                  (assoc request
@@ -208,13 +210,7 @@
                         :checkrun/conclusion "failure"
                         :checkrun/output
                         {:title "Lein Deploy error"
-                         :summary "There was an error configuring gpg"}))
-               (finally
-                ;; should throw exception and break the whole execution if this fails
-                 (log/debug "Cleaning up temporary files...")
-                 (io/delete-file gpg-file)
-                 (when gpg-key-passphrase
-                   (io/delete-file pwd-file))))))
+                         :summary "There was an error configuring gpg"})))))
          (do
            (log/infof "No GPG keys found, not signing")
            (<? (handler request))))))))
