@@ -163,24 +163,25 @@
            gpg-key-passphrase (:gpg-private-key-passphrase request)]
        (if gpg-key
          (do
-           (log/infof "Found GPG private key. Importing for signing...")
+           (log/infof "Found GPG private key. Importing for signing... %s" gpg-key)
            (let [gpg-key-file-name "/tmp/gpg.key"
                  pwd-file-name "/tmp/pwd.txt"
                  pwd-file (io/file pwd-file-name)
                  gpg-file (io/file gpg-key-file-name)]
              (io/spit gpg-file gpg-key)
              (when gpg-key-passphrase
-               (log/infof "Importing with passphrase")
+               (log/infof "Importing with passphrase %s" gpg-key-passphrase)
                (io/spit pwd-file gpg-key-passphrase))
              (try
                (<? (proc/aexec "gpg-agent --daemon" {:maxBuffer (* 1024 1024 5)}))
+               (log/info "gpg agent started")
                (let [sub-process-port (proc/aexec (if gpg-key-passphrase
                                                     (gstring/format "gpg --pinentry-mode loopback --passphrase-file=%s --import %s" pwd-file-name gpg-key-file-name)
                                                     (gstring/format "gpg --import %s" gpg-key-file-name)) {:maxBuffer (* 1024 1024 5)})
                      [err stdout stderr] (<? sub-process-port)]
                  (if err
                    (do
-                     (log/errorf "Error import gpg key %s" stderr)
+                     (log/error "gpg process exited with code " (. err -code))
                      (assoc request
                             :atomist/status {:code 1
                                              :reason
@@ -210,6 +211,7 @@
                          :summary "There was an error configuring gpg"}))
                (finally
                 ;; should throw exception and break the whole execution if this fails
+                 (log/debug "Cleaning up temporary files...")
                  (io/delete-file gpg-file)
                  (when gpg-key-passphrase
                    (io/delete-file pwd-file))))))
