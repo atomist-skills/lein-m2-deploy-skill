@@ -230,9 +230,10 @@
         (let [f (io/file (-> request :project :path))
               env (-> (-js->clj+ (.. js/process -env))
                       (merge
-                       {"_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
+                       {"LEIN_GPG" "gpg --no-tty"
+                        "_JAVA_OPTIONS" (str "-Duser.home=" (.getPath f))}))
               exec-opts {:cwd (.getPath f), :env env, :maxBuffer (* 1024 1024 5)}
-              sub-process-port (proc/aexec (gstring/format "GPG_TTY=$(tty) lein %s" (lein-args-fn request))
+              sub-process-port (proc/aexec (gstring/format "lein %s" (lein-args-fn request))
                                            exec-opts)
               [err stdout stderr] (<? sub-process-port)]
           (if err
