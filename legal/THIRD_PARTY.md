@@ -9,7 +9,7 @@ This page details all runtime dependencies of `atomist-skill`.
 | License                         | Count |
 | ------------------------------- | ----- |
 | [0BSD](#0bsd)                   | 4     |
-| [Apache-2.0](#apache-20)        | 46    |
+| [Apache-2.0](#apache-20)        | 37    |
 | [BSD-2-Clause](#bsd-2-clause)   | 10    |
 | [BSD-3-Clause](#bsd-3-clause)   | 23    |
 | [CC-BY-4.0](#cc-by-40)          | 1     |
@@ -18,7 +18,7 @@ This page details all runtime dependencies of `atomist-skill`.
 | [GPL-3.0](#gpl-30)              | 1     |
 | [ISC](#isc)                     | 44    |
 | [MIT AND Zlib](#mit-and-zlib)   | 1     |
-| [MIT](#mit)                     | 598   |
+| [MIT](#mit)                     | 596   |
 | [Public Domain](#public-domain) | 1     |
 | [Python-2.0](#python-20)        | 1     |
 | [UNKNOWN](#unknown)             | 1     |
@@ -40,7 +40,6 @@ Apache License 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apa
 
 | Name                                  | Version          | Publisher             | Repository                                                                                                                       |
 | ------------------------------------- | ---------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `@atomist/skill-logging`              | `1.0.3`          | Atomist, Inc.         | [https://github.com/atomist-skills/skill-logging](https://github.com/atomist-skills/skill-logging)                               |
 | `@atomist/skill-logging`              | `1.0.4`          | Atomist, Inc.         | [https://github.com/atomist-skills/skill-logging](https://github.com/atomist-skills/skill-logging)                               |
 | `@atomist/skill`                      | `0.10.1-main.30` | Atomist, Inc.         | [https://github.com/atomist-skills/skill](https://github.com/atomist-skills/skill)                                               |
 | `@atomist/slack-messages`             | `1.2.2`          | Atomist               | [https://github.com/atomist/slack-messages](https://github.com/atomist/slack-messages)                                           |
@@ -50,22 +49,14 @@ Apache License 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apa
 | `@google-cloud/precise-date`          | `2.0.3`          | Google Inc.           | [https://github.com/googleapis/nodejs-precise-date](https://github.com/googleapis/nodejs-precise-date)                           |
 | `@google-cloud/projectify`            | `2.0.1`          | Google Inc.           | [https://github.com/googleapis/nodejs-projectify](https://github.com/googleapis/nodejs-projectify)                               |
 | `@google-cloud/promisify`             | `2.0.3`          | Google Inc.           | [https://github.com/googleapis/nodejs-promisify](https://github.com/googleapis/nodejs-promisify)                                 |
-| `@google-cloud/pubsub`                | `2.10.0`         | Google Inc.           | [https://github.com/googleapis/nodejs-pubsub](https://github.com/googleapis/nodejs-pubsub)                                       |
 | `@google-cloud/pubsub`                | `2.11.0`         | Google Inc.           | [https://github.com/googleapis/nodejs-pubsub](https://github.com/googleapis/nodejs-pubsub)                                       |
-| `@google-cloud/storage`               | `5.8.3`          | Google Inc.           | [https://github.com/googleapis/nodejs-storage](https://github.com/googleapis/nodejs-storage)                                     |
 | `@google-cloud/storage`               | `5.8.4`          | Google Inc.           | [https://github.com/googleapis/nodejs-storage](https://github.com/googleapis/nodejs-storage)                                     |
 | `@grpc/grpc-js`                       | `1.2.12`         | Google Inc.           | [https://github.com/grpc/grpc-node/tree/master/packages/grpc-js](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js) |
 | `@grpc/proto-loader`                  | `0.5.6`          | Google Inc.           | [https://github.com/grpc/grpc-node](https://github.com/grpc/grpc-node)                                                           |
 | `@opencensus/core`                    | `0.0.22`         | Google Inc.           | [https://github.com/census-instrumentation/opencensus-node](https://github.com/census-instrumentation/opencensus-node)           |
 | `@opencensus/propagation-stackdriver` | `0.0.22`         | OpenCensus Authors    | [https://github.com/census-instrumentation/opencensus-node](https://github.com/census-instrumentation/opencensus-node)           |
-| `@opentelemetry/api`                  | `0.12.0`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js)                         |
 | `@opentelemetry/api`                  | `0.18.1`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js-api](https://github.com/open-telemetry/opentelemetry-js-api)                 |
-| `@opentelemetry/context-base`         | `0.12.0`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js)                         |
-| `@opentelemetry/core`                 | `0.12.0`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js)                         |
-| `@opentelemetry/resources`            | `0.12.0`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js)                         |
-| `@opentelemetry/semantic-conventions` | `0.12.0`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js)                         |
 | `@opentelemetry/semantic-conventions` | `0.18.2`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js)                         |
-| `@opentelemetry/tracing`              | `0.12.0`         | OpenTelemetry Authors | [https://github.com/open-telemetry/opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js)                         |
 | `before-after-hook`                   | `2.2.1`          | Gregor Martynus       | [https://github.com/gr2m/before-after-hook](https://github.com/gr2m/before-after-hook)                                           |
 | `bser`                                | `2.1.1`          | Wez Furlong           | [https://github.com/facebook/watchman](https://github.com/facebook/watchman)                                                     |
 | `ecdsa-sig-formatter`                 | `1.0.11`         | D2L Corporation       | [https://github.com/Brightspace/node-ecdsa-sig-formatter](https://github.com/Brightspace/node-ecdsa-sig-formatter)               |
@@ -444,7 +435,6 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `crypto-random-string`                               | `2.0.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/crypto-random-string](https://github.com/sindresorhus/crypto-random-string)                                                                                         |
 | `d64`                                                | `1.0.0`        | Dominic Tarr                   | [https://github.com/dominictarr/d64](https://github.com/dominictarr/d64)                                                                                                                             |
 | `dataloader`                                         | `2.0.0`        |                                | [https://github.com/graphql/dataloader](https://github.com/graphql/dataloader)                                                                                                                       |
-| `date-and-time`                                      | `0.14.2`       | KNOWLEDGECODE                  | [https://github.com/knowledgecode/date-and-time](https://github.com/knowledgecode/date-and-time)                                                                                                     |
 | `date-and-time`                                      | `1.0.0`        | KNOWLEDGECODE                  | [https://github.com/knowledgecode/date-and-time](https://github.com/knowledgecode/date-and-time)                                                                                                     |
 | `date-fns`                                           | `1.30.1`       | Sasha Koss                     | [https://github.com/date-fns/date-fns](https://github.com/date-fns/date-fns)                                                                                                                         |
 | `debounce`                                           | `1.2.1`        |                                | [https://github.com/component/debounce](https://github.com/component/debounce)                                                                                                                       |
@@ -504,7 +494,6 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `get-intrinsic`                                      | `1.1.1`        | Jordan Harband                 | [https://github.com/ljharb/get-intrinsic](https://github.com/ljharb/get-intrinsic)                                                                                                                   |
 | `get-stream`                                         | `4.1.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/get-stream](https://github.com/sindresorhus/get-stream)                                                                                                             |
 | `get-stream`                                         | `5.2.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/get-stream](https://github.com/sindresorhus/get-stream)                                                                                                             |
-| `get-stream`                                         | `6.0.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/get-stream](https://github.com/sindresorhus/get-stream)                                                                                                             |
 | `get-stream`                                         | `6.0.1`        | Sindre Sorhus                  | [https://github.com/sindresorhus/get-stream](https://github.com/sindresorhus/get-stream)                                                                                                             |
 | `git-up`                                             | `4.0.2`        | Ionică Bizău                   | [https://github.com/IonicaBizau/git-up](https://github.com/IonicaBizau/git-up)                                                                                                                       |
 | `git-url-parse`                                      | `11.4.4`       | Ionică Bizău                   | [https://github.com/IonicaBizau/git-url-parse](https://github.com/IonicaBizau/git-url-parse)                                                                                                         |
@@ -847,7 +836,7 @@ Python License 2.0 - [https://opensource.org/licenses/Python-2.0](https://openso
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.46` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.51` | jim@atomist.com |            |
 
 ## Contact
 
