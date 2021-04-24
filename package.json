@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@atomist/api-cljs": "^0.5.51",
-    "@atomist/skill": "^0.10.1-main.30",
+    "@atomist/skill": "^0.10.1-main.31",
     "js-yaml": "^3.14.1"
   },
   "devDependencies": {
