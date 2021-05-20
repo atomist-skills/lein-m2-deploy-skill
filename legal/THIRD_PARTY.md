@@ -838,7 +838,7 @@ Python License 2.0 - [https://opensource.org/licenses/Python-2.0](https://openso
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.62` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.63` | jim@atomist.com |            |
 
 ## Contact
 
