@@ -6,22 +6,23 @@ This page details all runtime dependencies of `atomist-skill`.
 
 ### Summary
 
-| License                         | Count |
-| ------------------------------- | ----- |
-| [0BSD](#0bsd)                   | 4     |
-| [Apache-2.0](#apache-20)        | 38    |
-| [BSD-2-Clause](#bsd-2-clause)   | 10    |
-| [BSD-3-Clause](#bsd-3-clause)   | 23    |
-| [CC-BY-4.0](#cc-by-40)          | 1     |
-| [CC0-1.0](#cc0-10)              | 2     |
-| [GPL-2.0](#gpl-20)              | 1     |
-| [GPL-3.0](#gpl-30)              | 1     |
-| [ISC](#isc)                     | 44    |
-| [MIT AND Zlib](#mit-and-zlib)   | 1     |
-| [MIT](#mit)                     | 596   |
-| [Public Domain](#public-domain) | 1     |
-| [Python-2.0](#python-20)        | 1     |
-| [UNKNOWN](#unknown)             | 1     |
+| License                                | Count |
+| -------------------------------------- | ----- |
+| [0BSD](#0bsd)                          | 4     |
+| [Apache-2.0](#apache-20)               | 39    |
+| [BSD-2-Clause](#bsd-2-clause)          | 10    |
+| [BSD-3-Clause](#bsd-3-clause)          | 23    |
+| [CC-BY-4.0](#cc-by-40)                 | 1     |
+| [CC0-1.0](#cc0-10)                     | 2     |
+| [GPL-2.0](#gpl-20)                     | 1     |
+| [GPL-3.0](#gpl-30)                     | 1     |
+| [ISC](#isc)                            | 44    |
+| [LGPL-3.0-or-later](#lgpl-30-or-later) | 1     |
+| [MIT AND Zlib](#mit-and-zlib)          | 1     |
+| [MIT](#mit)                            | 596   |
+| [Public Domain](#public-domain)        | 1     |
+| [Python-2.0](#python-20)               | 1     |
+| [UNKNOWN](#unknown)                    | 1     |
 
 #### 0BSD
 
@@ -41,6 +42,7 @@ Apache License 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apa
 | Name                                  | Version          | Publisher             | Repository                                                                                                                       |
 | ------------------------------------- | ---------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `@atomist/skill-logging`              | `1.0.4`          | Atomist, Inc.         | [https://github.com/atomist-skills/skill-logging](https://github.com/atomist-skills/skill-logging)                               |
+| `@atomist/skill-logging`              | `1.0.7`          | Atomist, Inc.         | [https://github.com/atomist-skills/skill-logging](https://github.com/atomist-skills/skill-logging)                               |
 | `@atomist/skill`                      | `0.10.1-main.36` | Atomist, Inc.         | [https://github.com/atomist-skills/skill](https://github.com/atomist-skills/skill)                                               |
 | `@atomist/skill`                      | `0.11.0`         | Atomist, Inc.         | [https://github.com/atomist-skills/skill](https://github.com/atomist-skills/skill)                                               |
 | `@atomist/slack-messages`             | `1.2.2`          | Atomist               | [https://github.com/atomist/slack-messages](https://github.com/atomist/slack-messages)                                           |
@@ -209,6 +211,14 @@ ISC License - [https://www.isc.org/downloads/software-support-policy/isc-license
 | `yaml`                      | `1.10.0`  | Eemeli Aro         | [https://github.com/eemeli/yaml](https://github.com/eemeli/yaml)                                             |
 | `yargs-parser`              | `18.1.3`  | Ben Coe            | [https://github.com/yargs/yargs-parser](https://github.com/yargs/yargs-parser)                               |
 | `yargs-parser`              | `20.2.7`  | Ben Coe            | [https://github.com/yargs/yargs-parser](https://github.com/yargs/yargs-parser)                               |
+
+#### LGPL-3.0-or-later
+
+GNU Lesser General Public License v3.0 or later - [https://www.gnu.org/licenses/lgpl-3.0-standalone.html](https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
+
+| Name                      | Version | Publisher           | Repository                                                                                                       |
+| ------------------------- | ------- | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `parse-docker-image-name` | `3.0.0` | William Blankenship | [https://github.com/retrohacker/parse-docker-image-name](https://github.com/retrohacker/parse-docker-image-name) |
 
 #### MIT
 
@@ -690,7 +700,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `picomatch`                                          | `2.2.2`        | Jon Schlinkert                 | [https://github.com/micromatch/picomatch](https://github.com/micromatch/picomatch)                                                                                                                   |
 | `pluralize`                                          | `8.0.0`        | Blake Embrey                   | [https://github.com/blakeembrey/pluralize](https://github.com/blakeembrey/pluralize)                                                                                                                 |
 | `prepend-http`                                       | `2.0.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/prepend-http](https://github.com/sindresorhus/prepend-http)                                                                                                         |
-| `prettier`                                           | `2.2.1`        | James Long                     | [https://github.com/prettier/prettier](https://github.com/prettier/prettier)                                                                                                                         |
+| `prettier`                                           | `2.3.0`        | James Long                     | [https://github.com/prettier/prettier](https://github.com/prettier/prettier)                                                                                                                         |
 | `process-nextick-args`                               | `2.0.1`        |                                | [https://github.com/calvinmetcalf/process-nextick-args](https://github.com/calvinmetcalf/process-nextick-args)                                                                                       |
 | `promise`                                            | `7.3.1`        | ForbesLindesay                 | [https://github.com/then/promise](https://github.com/then/promise)                                                                                                                                   |
 | `protocols`                                          | `1.4.8`        | Ionică Bizău                   | [https://github.com/IonicaBizau/protocols](https://github.com/IonicaBizau/protocols)                                                                                                                 |
@@ -837,7 +847,7 @@ Python License 2.0 - [https://opensource.org/licenses/Python-2.0](https://openso
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.51` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.66` | jim@atomist.com |            |
 
 ## Contact
 
