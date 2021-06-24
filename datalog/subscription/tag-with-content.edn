@@ -13,12 +13,12 @@
                     :maven.repository/username
                     :maven.repository/repository-id])
  ?usage
- :in $ $before-db %
+ :in $ $before-db % ?ctx
  :where
- (get-config-value "path-not-exists" [] ?path-not-exists)
- (tx-tag-with-content [] ["project.clj"] ?path-not-exists ?ref)
+ (get-skill-config-value ?ctx "path-not-exists" [] ?path-not-exists)
+ (tag-with-content-tx ?ctx [] ["project.clj"] ?path-not-exists ?ref)
  [?ref :git.ref/commit ?commit]
  [?ref :git.ref/type :git.ref.type/tag]
  [?commit :git.commit/repo ?repo]
  (repo-language ?repo "Clojure")
- (capability-configuration "atomist" "MavenRepository" ?usage ?maven-repo)]
+ (skill-capability-configuration ?ctx "atomist" "MavenRepository" ?usage ?maven-repo)]
