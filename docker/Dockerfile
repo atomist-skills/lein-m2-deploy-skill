@@ -1,4 +1,4 @@
-FROM gcr.io/atomist-container-skills/clojure-base:openjdk11@sha256:16573fd54bd6cd7d6a5776e95fb81f35e39e1d51cdd35198d592a91bc6425701
+FROM gcr.io/atomist-container-skills/clojure-base:openjdk11@sha256:8fab20562af88acab4f183b9713093fca85011b2e62677ce8e5ef6390da50ee7
 
 WORKDIR /usr/src/app
 
